@@ -9,3 +9,9 @@
 @function color($name) {
   @return map.get(var.$colors, $name);
 }
+
+// font-size: px-to-rem(16px);
+
+//background-color: color(background);
+
+//@include typo(primary, 700);
