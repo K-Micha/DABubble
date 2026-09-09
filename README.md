@@ -2,6 +2,48 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.23.
 
+## Setup
+
+```bash
+npm install
+```
+
+### Firebase
+
+Wir nutzen das native `firebase` SDK (modular, v12) statt `@angular/fire`
+(fuer Angular 21 aktuell nur als RC mit kaputten Peer-Deps verfuegbar).
+
+1. In der [Firebase Console](https://console.firebase.google.com/) ein Projekt
+   anlegen, Web-App registrieren, **Authentication** (E-Mail/Passwort + Google)
+   und **Cloud Firestore** aktivieren.
+2. Die Web-Config in `src/environments/environment.ts` **und**
+   `src/environments/environment.development.ts` eintragen (die `TODO`-Werte
+   ersetzen).
+3. Projekt-ID in `.firebaserc` (`default`) setzen.
+
+Initialisiert wird Firebase in [`src/app/shared/firebase/firebase.providers.ts`](src/app/shared/firebase/firebase.providers.ts)
+via `provideFirebase()` (eingebunden in `app.config.ts`). Services injizieren
+`FIREBASE_AUTH` / `FIRESTORE` aus `firebase.tokens.ts`.
+
+### Deploy (Firebase Hosting)
+
+```bash
+npm run build
+npx firebase-tools deploy --only hosting
+```
+
+## Projektstruktur
+
+```
+src/app/
+  components/   Feature-Komponenten (auth, channel, workspace, ...)
+  pages/        Statische Seiten (Impressum, Datenschutz)
+  shared/       Geteilter Code: firebase/, models/ (Firestore-Datenmodell)
+  pipes/        Geteilte Pipes
+public/img/      Statische Bilder
+src/environments/ Umgebungs-Config (Firebase)
+```
+
 ## Development server
 
 To start a local development server, run:
