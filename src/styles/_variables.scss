@@ -1,0 +1,31 @@
+$colors: (
+  white: rgba(255, 255, 255, 1),
+  background: rgba(236, 238, 254, 1),
+
+  purple-1: rgba(68, 77, 242, 1),
+  purple-2: rgba(121, 126, 243, 1),
+  purple-3: rgba(83, 90, 241, 1),
+  light-purple: rgba(173, 176, 217, 1),
+
+  black: rgba(0, 0, 0, 1),
+  text-gray: rgba(104, 104, 104, 1),
+
+  shadow: rgba(0, 0, 0, 0.2),
+
+  blue: rgba(19, 129, 255, 1),
+
+  label-1: rgba(234, 67, 53, 1),
+  label-2: rgba(26, 115, 232, 1),
+  label-3: rgba(249, 171, 1, 1),
+  label-4: rgba(30, 142, 62, 1),
+  label-5: rgba(100, 103, 108, 1),
+
+  online: rgba(146, 200, 62, 1),
+  error: rgba(237, 30, 121, 1)
+);
+
+$fonts: (
+  mulish: 'Mulish',
+  nokora: 'Nokora',
+  nerko-one: 'Nerko One',
+);

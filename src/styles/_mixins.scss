@@ -1,0 +1,29 @@
+@use 'functions' as fct;
+
+@mixin flex(
+  $direction: row,
+  $justify: center,
+  $align: center
+) {
+  display: flex;
+  flex-direction: $direction;
+  justify-content: $justify;
+  align-items: $align;
+}
+
+/*  @include mx.flex(column, .., ...,); */
+
+@mixin typo($font, $weight: 400) {
+    font-family: fct.font($font);
+    font-weight: $weight;
+}
+
+/* @include mx.typo(nokora, 700); */
+
+@mixin transition(
+  $duration: 250ms,
+  $timing: ease-in-out
+) {
+  transition-duration: $duration;
+  transition-timing-function: $timing;
+}
