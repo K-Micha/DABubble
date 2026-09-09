@@ -14,4 +14,8 @@ export const environment = {
     messagingSenderId: '946133175704',
     appId: '1:946133175704:web:4ac61b4c6a97ae1d4a6fed',
   },
+    supabase: {
+    url: 'https://hpyyktoyofffpfunjgna.supabase.co',
+    anonKey: 'DEIN_SUPABASE_ANON_KEY',
+  },
 };
