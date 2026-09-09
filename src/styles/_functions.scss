@@ -1,0 +1,35 @@
+@use 'sass:math';
+@use 'sass:map';
+@use 'variables' as var;
+
+@function px-to-rem($px, $base: 16px) {
+  @return math.div($px, $base) * 1rem;
+}
+
+@function color($name) {
+  @return map.get(var.$colors, $name);
+}
+
+@function size($name) {
+  @return px-to-rem(map.get(var.$sizes, $name));
+}
+
+@function font-size($name) {
+  @return px-to-rem(map.get(var.$font-sizes, $name));
+}
+
+@function breakpoint($name) {
+  @return map.get(var.$breakpoints, $name);
+}
+
+@function layout($name) {
+  @return px-to-rem(map.get(var.$layout, $name));
+}
+
+@function font($name) {
+  @return map.get(var.$fonts, $name);
+}
+
+@function content-width($inline) {
+  @return calc(100% - (px-to-rem($inline) * 2));
+}
