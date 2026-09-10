@@ -58,6 +58,23 @@
   color: fct.color(black);
 }
 
+// Zurueck-Pfeil oben links auf der Karte (Register Schritt 2, Passwort vergessen, ...)
+.auth-back {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  @include mx.flex(row, center, center);
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  outline: none;
+  background: none;
+  color: fct.color(text-gray);
+  cursor: pointer;
+  text-decoration: none;
+}
+
 .auth-form {
   @include mx.flex(column, flex-start, stretch);
   gap: 16px;
@@ -131,6 +148,8 @@
 
 // --- Buttons ---
 .auth-btn {
+  @include mx.flex(row, center, center);
+  display: inline-flex;
   border: none;
   outline: none;
   cursor: pointer;
@@ -138,6 +157,7 @@
   border-radius: 25px;
   @include mx.typo(nunito, 700);
   font-size: 18px;
+  text-decoration: none;
   @include mx.transition();
 
   &:disabled {
@@ -158,6 +178,11 @@
   &:hover:not(:disabled) {
     background: fct.color(purple-2);
   }
+
+  &:disabled {
+    background: fct.color(text-gray);
+    opacity: 1;
+  }
 }
 
 .auth-btn--secondary {
@@ -171,7 +196,6 @@
 }
 
 .auth-btn--google {
-  @include mx.flex(row, center, center);
   gap: 12px;
   background: fct.color(white);
   color: fct.color(black);
@@ -185,6 +209,11 @@
 @media (max-width: 480px) {
   .auth-card {
     padding: 24px 16px;
+  }
+
+  .auth-back {
+    top: 16px;
+    left: 16px;
   }
 
   .auth-card__title {

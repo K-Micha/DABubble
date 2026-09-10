@@ -5,21 +5,6 @@
   display: block;
 }
 
-.register__back {
-  position: absolute;
-  top: 24px;
-  left: 24px;
-  @include mx.flex(row, center, center);
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  border: none;
-  outline: none;
-  background: none;
-  cursor: pointer;
-  color: fct.color(text-gray);
-}
-
 .register__consent {
   @include mx.flex(row, flex-start, center);
   gap: 12px;
@@ -130,11 +115,6 @@
 }
 
 @media (max-width: 480px) {
-  .register__back {
-    top: 16px;
-    left: 16px;
-  }
-
   .register__consent {
     font-size: 14px;
   }

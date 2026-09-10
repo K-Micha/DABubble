@@ -1,9 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, input } from '@angular/core';
 
+/** Zentrierter Bestätigungs-Toast (z. B. "Anmelden" nach dem Passwort-Reset). */
 @Component({
   selector: 'app-toast',
-  imports: [],
   templateUrl: './toast.html',
   styleUrl: './toast.scss',
 })
-export class Toast {}
+export class Toast {
+  readonly message = input.required<string>();
+}

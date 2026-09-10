@@ -1,8 +1,10 @@
 import { inject, Injectable } from '@angular/core';
 import { FirebaseError } from 'firebase/app';
 import {
+  confirmPasswordReset,
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
+  sendPasswordResetEmail,
   signInAnonymously,
   signInWithEmailAndPassword,
   signInWithPopup,
@@ -22,8 +24,10 @@ const AUTH_ERROR_MESSAGES: Record<string, string | undefined> = {
   'auth/popup-closed-by-user': 'Anmeldung abgebrochen.',
   'auth/popup-blocked': 'Das Anmelde-Popup wurde blockiert. Bitte erlaube Popups.',
   'auth/email-already-in-use': 'Diese E-Mail-Adresse wird bereits verwendet.',
-  'auth/weak-password': 'Das Passwort ist zu schwach. Mindestens 6 Zeichen.',
+  'auth/weak-password': 'Das Passwort ist zu schwach. Bitte wähle mindestens 6 Zeichen.',
   'auth/operation-not-allowed': 'Diese Anmeldemethode ist nicht aktiviert.',
+  'auth/expired-action-code': 'Dieser Link ist abgelaufen. Bitte fordere einen neuen Link an.',
+  'auth/invalid-action-code': 'Dieser Link ist ungültig oder wurde bereits verwendet.',
   'permission-denied': 'Speichern nicht erlaubt. Bitte prüfe die Firestore-Regeln.',
   unavailable: 'Dienst nicht erreichbar. Bitte versuche es später erneut.',
 };
@@ -51,6 +55,29 @@ export class AuthService {
     const credential = await createUserWithEmailAndPassword(this.auth, email, password);
     await updateProfile(credential.user, { displayName: name });
     return credential.user.uid;
+  }
+
+  /**
+   * Schickt eine Passwort-Reset-Mail. `auth/user-not-found` wird bewusst
+   * geschluckt (Schutz gegen E-Mail-Enumeration) – der Aufrufer zeigt immer
+   * dieselbe neutrale Erfolgsmeldung.
+   */
+  async sendResetEmail(email: string): Promise<void> {
+    try {
+      await sendPasswordResetEmail(this.auth, email);
+    } catch (error) {
+      if (error instanceof FirebaseError && error.code === 'auth/user-not-found') return;
+      throw error;
+    }
+  }
+
+  /** Setzt das Passwort per oobCode aus der Reset-Mail. Wirft `Error` mit fertiger Meldung. */
+  async confirmReset(oobCode: string, newPassword: string): Promise<void> {
+    try {
+      await confirmPasswordReset(this.auth, oobCode, newPassword);
+    } catch (error) {
+      throw new Error(this.toMessage(error));
+    }
   }
 
   toMessage(error: unknown): string {

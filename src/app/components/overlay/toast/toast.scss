@@ -1,0 +1,24 @@
+@use '../../../../styles/functions' as fct;
+@use '../../../../styles/mixins' as mx;
+
+:host {
+  display: block;
+}
+
+.toast {
+  padding: 50px;
+  border-radius: 30px;
+  background: fct.color(purple-1);
+  color: fct.color(white);
+  @include mx.typo(nunito, 700);
+  font-size: 36px;
+  text-align: center;
+  box-shadow: 0 6px 10px 0 rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 480px) {
+  .toast {
+    padding: 32px;
+    font-size: 28px;
+  }
+}
