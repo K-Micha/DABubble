@@ -5,7 +5,6 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../shared/auth/auth.service';
 import { Icon } from '../../../shared/icon/icon';
 import { LegalLinks } from '../../../shared/legal-links/legal-links';
-import { Header } from '../../workspace/header/header';
 import { User } from '../../../shared/models';
 import { UserService } from '../../../shared/user/user.service';
 
@@ -15,7 +14,7 @@ const AVATARS = ['avatar01', 'avatar02', 'avatar03', 'avatar04', 'avatar05', 'av
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, RouterLink, LegalLinks, Icon, Header],
+  imports: [ReactiveFormsModule, RouterLink, LegalLinks, Icon],
   templateUrl: './register.html',
   styleUrl: './register.scss',
 })
