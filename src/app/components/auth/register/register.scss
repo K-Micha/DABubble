@@ -40,10 +40,6 @@
   }
 }
 
-.register__actions {
-  @include mx.flex(row, flex-end, center);
-}
-
 .register__submit {
   padding-inline: 32px;
 }

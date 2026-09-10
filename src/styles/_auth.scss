@@ -49,23 +49,6 @@
   color: fct.color(black);
 }
 
-// Zurueck-Pfeil oben links auf der Karte (Register Schritt 2, Passwort vergessen, ...)
-.auth-back {
-  position: absolute;
-  top: 24px;
-  left: 24px;
-  @include mx.flex(row, center, center);
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  border: none;
-  outline: none;
-  background: none;
-  color: fct.color(text-gray);
-  cursor: pointer;
-  text-decoration: none;
-}
-
 .auth-form {
   @include mx.flex(column, flex-start, stretch);
   gap: 16px;
@@ -138,9 +121,21 @@
 }
 
 // --- Buttons ---
+// Aktions-Zeile am Kartenende: "Zurück" links, Primär-Aktion rechts.
+.auth-actions {
+  @include mx.flex(row, space-between, center);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.auth-actions--center {
+  justify-content: center;
+}
+
 .auth-btn {
   @include mx.flex(row, center, center);
   display: inline-flex;
+  gap: 8px;
   border: none;
   outline: none;
   cursor: pointer;
@@ -154,6 +149,11 @@
   &:disabled {
     opacity: 0.5;
     cursor: default;
+  }
+
+  app-icon {
+    width: 20px;
+    height: 20px;
   }
 }
 
@@ -200,11 +200,6 @@
 @media (max-width: 480px) {
   .auth-card {
     padding: 24px 16px;
-  }
-
-  .auth-back {
-    top: 16px;
-    left: 16px;
   }
 
   .auth-card__title {

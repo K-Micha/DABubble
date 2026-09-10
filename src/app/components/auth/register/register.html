@@ -3,10 +3,6 @@
 
   <main class="auth-page__content">
     <section class="auth-card">
-      <button type="button" class="auth-back" (click)="goBack()" aria-label="Zurück">
-        <app-icon name="arrow-back" />
-      </button>
-
       @if (step() === 'form') {
         <h1 class="auth-card__title">Konto erstellen</h1>
         <p class="auth-card__subtitle">
@@ -71,7 +67,11 @@
             {{ formError() }}
           </p>
 
-          <div class="register__actions">
+          <div class="auth-actions">
+            <button type="button" class="auth-btn auth-btn--secondary" (click)="goBack()">
+              <app-icon name="arrow-back" />
+              Zurück
+            </button>
             <button
               type="submit"
               class="auth-btn auth-btn--primary register__submit"
@@ -112,7 +112,16 @@
           </p>
         </div>
 
-        <div class="register__actions">
+        <div class="auth-actions">
+          <button
+            type="button"
+            class="auth-btn auth-btn--secondary"
+            [disabled]="loading()"
+            (click)="goBack()"
+          >
+            <app-icon name="arrow-back" />
+            Zurück
+          </button>
           <button
             type="button"
             class="auth-btn auth-btn--primary register__submit"
