@@ -12,32 +12,45 @@ npm install
 
 Wir nutzen das native `firebase` SDK (modular, v12) statt `@angular/fire`
 (fuer Angular 21 aktuell nur als RC mit kaputten Peer-Deps verfuegbar).
+Firebase-Projekt: **dababble**. Auth-Provider: E-Mail/Passwort, Google, Anonym.
+Firestore-Collection `users` fuer die Profile. Storage → Supabase.
 
-1. In der [Firebase Console](https://console.firebase.google.com/) ein Projekt
-   anlegen, Web-App registrieren, **Authentication** (E-Mail/Passwort + Google)
-   und **Cloud Firestore** aktivieren.
-2. Die Web-Config in `src/environments/environment.ts` **und**
-   `src/environments/environment.development.ts` eintragen (die `TODO`-Werte
-   ersetzen).
-3. Projekt-ID in `.firebaserc` (`default`) setzen.
+Web-Config liegt in `src/environments/environment.ts` (kein Secret – wird an
+den Client ausgeliefert). Projekt-ID in `.firebaserc`.
 
 Initialisiert wird Firebase in [`src/app/shared/firebase/firebase.providers.ts`](src/app/shared/firebase/firebase.providers.ts)
 via `provideFirebase()` (eingebunden in `app.config.ts`). Services injizieren
 `FIREBASE_AUTH` / `FIRESTORE` aus `firebase.tokens.ts`.
 
-### Deploy (Firebase Hosting)
+### Deploy (Firebase Hosting → `dabubble.dimit.cc`)
 
 ```bash
-npm run build
-npx firebase-tools deploy --only hosting
+npm run deploy   # = ng build + firebase deploy --only hosting
 ```
 
-**TODO vor dem ersten Produktions-Deploy:** In der Firebase Console unter
-Authentication → Templates → „Passwort zurücksetzen" → Aktions-URL von
-`http://localhost:4200/reset-password` auf die echte Domain
-(`https://<domain>/reset-password`) umstellen. Sonst zeigt der Link in der
-Reset-Mail in Produktion ins Leere. Die Domain muss außerdem unter
-Authentication → Settings → Autorisierte Domains stehen.
+Voraussetzung einmalig: `npx -y firebase-tools login`.
+
+`firebase.json` ist konfiguriert: SPA-Rewrite (`** → /index.html`, damit
+`/reset-password?oobCode=…` & Co. direkt funktionieren), `index.html`
+`no-cache`, gehashte JS/CSS/Fonts `immutable`.
+
+#### Custom Domain einrichten (einmalig)
+
+1. Firebase Console → **Hosting** → **Andere Domain hinzufügen** → `dabubble.dimit.cc`
+2. Firebase zeigt DNS-Einträge (A-Records oder TXT + A) → beim DNS von `dimit.cc` eintragen
+3. Warten bis Firebase „Verbunden" zeigt (SSL-Zertifikat wird automatisch ausgestellt)
+
+#### Firebase Console – nach dem ersten Deploy erledigen
+
+| Ort                                                                                | Was                                                                                                                                             |
+| ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Authentication → **Settings → Autorisierte Domains**                               | `dabubble.dimit.cc` hinzufügen (für Google-Login + Reset-Links)                                                                                 |
+| Authentication → **Templates → Passwort zurücksetzen** → ✏️ → Aktions-URL anpassen | `https://dabubble.dimit.cc/reset-password` — dann zeigt der Link in der Reset-Mail auf unsere eigene Seite statt auf die Firebase-Standardseite |
+| **Firestore → Rules**                                                              | Regeln für `users/{uid}` veröffentlicht? (Registrierung schreibt dorthin)                                                                       |
+| Authentication → **Sign-in method**                                                | E-Mail/Passwort, Google, Anonym aktiv                                                                                                           |
+
+Lokal testen ohne Custom-URL: `oobCode` aus dem Firebase-Reset-Link kopieren
+und `http://localhost:4200/reset-password?oobCode=<code>` aufrufen.
 
 ## Projektstruktur
 

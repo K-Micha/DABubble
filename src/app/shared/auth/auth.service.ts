@@ -79,18 +79,12 @@ export class AuthService {
   /**
    * Schickt eine Passwort-Reset-Mail. `auth/user-not-found` wird bewusst
    * geschluckt (Schutz gegen E-Mail-Enumeration) – der Aufrufer zeigt immer
-   * dieselbe neutrale Erfolgsmeldung.
-   * `url` = continueUrl (localhost wie Prod, ohne Hardcoding). Damit der Link
-   * selbst auf /reset-password zeigt, muss zusaetzlich die Action-URL in der
-   * Firebase Console (Auth -> Templates -> Passwort-Reset) angepasst werden.
+   * dieselbe neutrale Erfolgsmeldung. Wohin der Link zeigt, wird über die
+   * Action-URL in der Firebase Console gesteuert (Auth -> Templates), nicht hier.
    */
   async sendResetEmail(email: string): Promise<void> {
-    const actionCodeSettings = {
-      url: window.location.origin + '/reset-password',
-      handleCodeInApp: false,
-    };
     try {
-      await sendPasswordResetEmail(this.auth, email, actionCodeSettings);
+      await sendPasswordResetEmail(this.auth, email);
     } catch (error) {
       if (error instanceof FirebaseError && error.code === 'auth/user-not-found') return;
       throw error;

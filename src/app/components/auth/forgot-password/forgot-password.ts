@@ -1,6 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../shared/auth/auth.service';
 import { Icon } from '../../../shared/icon/icon';
@@ -24,25 +24,29 @@ export class ForgotPassword {
   protected readonly toastVisible = signal(false);
   protected readonly toastLeaving = signal(false);
 
-  protected readonly email = new FormControl('', {
-    nonNullable: true,
-    validators: [Validators.required, Validators.email],
+  protected readonly form = new FormGroup({
+    email: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.email],
+    }),
   });
 
-  private readonly status = toSignal(this.email.statusChanges, {
-    initialValue: this.email.status,
+  private readonly status = toSignal(this.form.statusChanges, {
+    initialValue: this.form.status,
   });
-  protected readonly emailInvalid = computed(() => this.status() !== 'VALID');
+  protected readonly formInvalid = computed(() => this.status() !== 'VALID');
 
   protected emailError(): string | null {
-    if (!this.email.touched || !this.email.errors) return null;
+    const control = this.form.controls.email;
+    if (!control.touched || !control.errors) return null;
+    if (control.errors['required']) return 'Bitte gib deine E-Mail-Adresse ein.';
     return '*Diese E-Mail-Adresse ist leider ungültig.';
   }
 
   protected onSubmit(): void {
     if (this.loading()) return;
-    if (this.emailInvalid()) {
-      this.email.markAsTouched();
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
       return;
     }
     void this.send();
@@ -52,7 +56,7 @@ export class ForgotPassword {
     this.loading.set(true);
     this.formError.set(null);
     try {
-      await this.authService.sendResetEmail(this.email.getRawValue());
+      await this.authService.sendResetEmail(this.form.getRawValue().email);
       this.sent.set(true);
       this.playToast();
     } catch (error) {
