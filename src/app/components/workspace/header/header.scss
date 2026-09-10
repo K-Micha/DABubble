@@ -1,63 +1,100 @@
 @use '../../../../styles/functions' as fct;
 @use '../../../../styles/mixins' as mx;
 
+:host {
+  display: block;
+}
+
 .header {
-    @include mx.flex(row, space-between, center);
-    width: 100%;
-    padding-block-start: fct.px-to-rem(75px);
-    padding-inline: 75px;
-    background-color: fct.color(background);
+  @include mx.flex(row, space-between, center);
+  flex-wrap: wrap;
+  gap: 16px;
+  width: 100%;
+  padding: clamp(24px, 6vw, 75px) clamp(16px, 6vw, 75px) 0;
+  background-color: fct.color(background);
 
-    &__logo {
-        @include mx.flex(row-reverse, center, center);
-        gap: fct.px-to-rem(16px);
+  &__logo {
+    @include mx.flex(row-reverse, center, center);
+    gap: clamp(8px, 2vw, 16px);
 
-
-        &--icon img {
-            height: fct.px-to-rem(70px);
-        }
-
-        &--text img {
-            width: fct.px-to-rem(156px);
-            height: fct.px-to-rem(24px);
-        }
+    img {
+      display: block;
     }
 
-    &__register {
-        @include mx.flex(column, center, flex-end);
-        gap: 10px;
+    &--icon img {
+      height: clamp(40px, 8vw, 70px);
+      width: auto;
     }
 
-    &__register-wrapper {
-        padding-block: fct.px-to-rem(10px);
-        padding-inline: fct.px-to-rem(15px);
-        border: 1px solid transparent;
-        border-radius: fct.px-to-rem(25px);
-        cursor: pointer;
-
-        &:hover {
-            border-color: fct.color(text-gray);
-        }
-
-        a {
-            font-family: fct.font(figtree);
-            font-weight: 400;
-            text-decoration: none;
-            color: fct.color(purple-2);
-        }
-
-        &:hover {
-            .header__link {
-                color: fct.color(purple-1);
-                font-weight: 500;
-            }
-        }
-
-        &__hint {
-            font-size: fct.px-to-rem(18px);
-            line-height: 100%;
-            letter-spacing: 0;
-            text-align: right;
-        }
+    &--text img {
+      width: clamp(96px, 20vw, 156px);
+      height: auto;
     }
+  }
+
+  &__register {
+    @include mx.flex(column, center, flex-end);
+    gap: 8px;
+    text-align: right;
+  }
+
+  &__register-hint {
+    font-family: fct.font(nunito);
+    font-weight: 400;
+    font-size: clamp(14px, 2vw, 18px);
+    line-height: 1;
+    color: fct.color(black);
+  }
+
+  &__register-wrapper {
+    padding: fct.px-to-rem(10px) fct.px-to-rem(15px);
+    border: 1px solid transparent;
+    border-radius: fct.px-to-rem(25px);
+    cursor: pointer;
+
+    &:hover {
+      border-color: fct.color(text-gray);
+
+      .header__link {
+        color: fct.color(purple-1);
+        font-weight: 500;
+      }
+    }
+
+    .header__link {
+      font-family: fct.font(figtree);
+      font-weight: 400;
+      font-size: clamp(15px, 2vw, 18px);
+      text-decoration: none;
+      color: fct.color(purple-2);
+    }
+  }
+
+  // --- App-Varianten (Workspace, noch nicht fertig) ---
+  &__search input {
+    border: none;
+    outline: none;
+    border-radius: 100px;
+    padding: 12px 24px;
+    background: fct.color(white);
+  }
+
+  &__user {
+    @include mx.flex(row, center, center);
+    gap: 12px;
+
+    img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+  }
+
+  &__avatar img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
 }

@@ -1,0 +1,26 @@
+@use '../../../../styles/functions' as fct;
+@use '../../../../styles/mixins' as mx;
+
+:host {
+  display: block;
+}
+
+.footer {
+  @include mx.flex(row, center, center);
+  flex-wrap: wrap;
+  gap: 16px 32px;
+  padding: clamp(16px, 3vw, 32px) 16px;
+}
+
+.footer__link {
+  font-family: fct.font(figtree);
+  font-weight: 400;
+  font-size: clamp(14px, 2vw, 18px);
+  color: fct.color(purple-2);
+  text-decoration: none;
+
+  &:hover {
+    color: fct.color(purple-1);
+    text-decoration: underline;
+  }
+}

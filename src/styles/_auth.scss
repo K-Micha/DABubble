@@ -6,31 +6,22 @@
 .auth-page {
   @include mx.flex(column, flex-start, stretch);
   min-height: 100dvh;
-  padding: 32px 16px;
   background: fct.color(background);
+
+  // Header, Content und Footer auf eine zentrierte Spalte begrenzen
+  // (Hintergrund bleibt vollflächig). 1920 = Figma-Frame, bei Bedarf anpassen.
+  > * {
+    width: 100%;
+    max-width: 1920px;
+    margin-inline: auto;
+  }
 }
 
 .auth-page__content {
   @include mx.flex(column, center, center);
   flex: 1 1 auto;
-  gap: 40px;
-  padding: 24px 0;
-}
-
-.auth-logo {
-  @include mx.flex(row, center, center);
-  gap: 16px;
-}
-
-.auth-logo__icon {
-  width: 48px;
-  height: 48px;
-}
-
-.auth-logo__text {
-  @include mx.typo(nunito, 700);
-  font-size: 32px;
-  color: fct.color(purple-3);
+  min-height: 0;
+  padding: 24px 16px;
 }
 
 .auth-card {

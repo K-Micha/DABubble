@@ -4,13 +4,14 @@ import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../shared/auth/auth.service';
 import { Icon } from '../../../shared/icon/icon';
-import { LegalLinks } from '../../../shared/legal-links/legal-links';
 import { Spinner } from '../../../shared/spinner/spinner';
 import { Toast } from '../../overlay/toast/toast';
+import { Footer } from '../../workspace/footer/footer';
+import { Header } from '../../workspace/header/header';
 
 @Component({
   selector: 'app-forgot-password',
-  imports: [ReactiveFormsModule, RouterLink, Icon, LegalLinks, Spinner, Toast],
+  imports: [ReactiveFormsModule, RouterLink, Icon, Header, Footer, Spinner, Toast],
   templateUrl: './forgot-password.html',
   styleUrl: './forgot-password.scss',
 })

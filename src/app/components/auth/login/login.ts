@@ -1,30 +1,18 @@
 import { Component, inject, signal } from '@angular/core';
-import {
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
 import { AuthService } from '../../../shared/auth/auth.service';
 import { Icon } from '../../../shared/icon/icon';
-import { LegalLinks } from '../../../shared/legal-links/legal-links';
 import { Spinner } from '../../../shared/spinner/spinner';
+import { Footer } from '../../workspace/footer/footer';
 import { Header } from '../../workspace/header/header';
 
 type LoginAction = 'email' | 'google' | 'guest';
 
 @Component({
   selector: 'app-login',
-  imports: [
-    ReactiveFormsModule,
-    RouterLink,
-    LegalLinks,
-    Icon,
-    Header,
-    Spinner,
-  ],
+  imports: [ReactiveFormsModule, RouterLink, Icon, Header, Footer, Spinner],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
@@ -57,40 +45,29 @@ export class Login {
 
     const { email, password } = this.form.getRawValue();
 
-    void this.run('email', () =>
-      this.authService.loginWithEmail(email, password)
-    );
+    void this.run('email', () => this.authService.loginWithEmail(email, password));
   }
 
   protected onGoogleLogin(): void {
     if (this.loading()) return;
 
-    void this.run('google', () =>
-      this.authService.loginWithGoogle()
-    );
+    void this.run('google', () => this.authService.loginWithGoogle());
   }
 
   protected onGuestLogin(): void {
     if (this.loading()) return;
 
-    void this.run('guest', () =>
-      this.authService.loginAsGuest()
-    );
+    void this.run('guest', () => this.authService.loginAsGuest());
   }
 
-  private async run(
-    action: LoginAction,
-    task: () => Promise<void>
-  ): Promise<void> {
+  private async run(action: LoginAction, task: () => Promise<void>): Promise<void> {
     this.setBusy(action);
 
     try {
       await task();
       await this.router.navigate(['/workspace']);
     } catch (error) {
-      this.formError.set(
-        this.authService.toMessage(error)
-      );
+      this.formError.set(this.authService.toMessage(error));
     } finally {
       this.setBusy(null);
     }

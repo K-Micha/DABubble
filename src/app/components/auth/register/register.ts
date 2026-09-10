@@ -4,11 +4,12 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../shared/auth/auth.service';
 import { Icon } from '../../../shared/icon/icon';
-import { LegalLinks } from '../../../shared/legal-links/legal-links';
 import { User } from '../../../shared/models';
 import { Spinner } from '../../../shared/spinner/spinner';
 import { UserService } from '../../../shared/user/user.service';
 import { Toast } from '../../overlay/toast/toast';
+import { Footer } from '../../workspace/footer/footer';
+import { Header } from '../../workspace/header/header';
 
 type RegisterStep = 'form' | 'avatar';
 
@@ -16,7 +17,7 @@ const AVATARS = ['avatar01', 'avatar02', 'avatar03', 'avatar04', 'avatar05', 'av
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, RouterLink, LegalLinks, Icon, Spinner, Toast],
+  imports: [ReactiveFormsModule, RouterLink, Icon, Header, Footer, Spinner, Toast],
   templateUrl: './register.html',
   styleUrl: './register.scss',
 })
