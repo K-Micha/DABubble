@@ -24,8 +24,11 @@ $colors: (
   error: rgba(237, 30, 121, 1)
 );
 
+// Keys entsprechen den Schriftnamen, die typo() / font() erwarten:
+// @include mx.typo(nunito, 700);  ->  font-family: 'Nunito', sans-serif;
 $fonts: (
-  mulish: 'Mulish',
-  nokora: 'Nokora',
-  nerko-one: 'Nerko One',
+  // Hauptfont: Body, UI, Ueberschriften
+  nunito: 'Nunito',
+  // Buttons "Account erstellen" & "Passwort vergessen"
+  figtree: 'Figtree',
 );
