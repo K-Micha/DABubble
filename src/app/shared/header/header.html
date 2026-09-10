@@ -1,0 +1,43 @@
+<header class="header" [class.header--auth-login]="variant === 'auth-login'"
+    [class.header--auth-register]="variant === 'auth-register'" [class.header--app]="variant === 'app'"
+    [class.header--mobile]="variant === 'mobile'">
+
+    <div class="header__logo">
+        <span class="header__logo--text">
+            <img src="/src/assets/app-img/bubble-text.svg" alt="DABubble">
+        </span>
+
+        <span class="header__logo--icon">
+            <img src="/src/assets/app-img/bubble-logo.svg" alt="DABubble">
+        </span>
+    </div>
+
+    @if (variant === 'auth-login') {
+    <div class="header__register">
+        <span>Neu bei DABubble?</span>
+        <a href="#">Konto erstellen</a>
+    </div>
+    }
+
+    @if (variant === 'app') {
+    <div class="header__search">
+        <input type="text" placeholder="Devspace durchsuchen">
+    </div>
+
+    <div class="header__user">
+        <span>Frederik Beck</span>
+        <img src="/assets/avatar/avatar.svg" alt="Frederik Beck">
+    </div>
+    }
+
+    @if (variant === 'mobile') {
+    <div class="header__avatar">
+        <img src="/assets/avatar/avatar.svg" alt="Profil">
+    </div>
+    }
+
+</header>
+
+<!-- <app-header variant="auth-login"></app-header> -->
+<!--  <app-header variant="auth-register"></app-header> -->
+<!--  <app-header variant="app"></app-header> -->

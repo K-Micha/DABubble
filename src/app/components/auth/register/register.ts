@@ -4,12 +4,13 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../shared/auth/auth.service';
 import { LegalLinks } from '../../../shared/legal-links/legal-links';
+import { Header } from '../../workspace/header/header';
 
 type RegisterStep = 'form' | 'avatar';
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, RouterLink, LegalLinks],
+  imports: [ReactiveFormsModule, RouterLink, LegalLinks, Header],
   templateUrl: './register.html',
   styleUrl: './register.scss',
 })
