@@ -24,7 +24,7 @@
       <form class="auth-form" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
         <div class="auth-field">
           <label class="auth-field__pill" [class.auth-field__pill--invalid]="emailError()">
-            <img class="auth-field__icon" src="assets/icons/mail.svg" alt="" />
+            <app-icon class="auth-field__icon" name="mail" />
             <input
               class="auth-field__input"
               type="email"
@@ -40,7 +40,7 @@
 
         <div class="auth-field">
           <label class="auth-field__pill" [class.auth-field__pill--invalid]="passwordError()">
-            <img class="auth-field__icon" src="assets/icons/lock.svg" alt="" />
+            <app-icon class="auth-field__icon" name="lock" />
             <input
               class="auth-field__input"
               type="password"

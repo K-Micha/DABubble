@@ -12,7 +12,7 @@
 
     <section class="auth-card">
       <button type="button" class="register__back" (click)="goBack()" aria-label="Zurück">
-        <img src="assets/icons/arrow_back.svg" alt="" />
+        <app-icon name="arrow-back" />
       </button>
 
       @if (step() === 'form') {
@@ -24,7 +24,7 @@
         <form class="auth-form" [formGroup]="form" (ngSubmit)="goToAvatarStep()" novalidate>
           <div class="auth-field">
             <label class="auth-field__pill" [class.auth-field__pill--invalid]="nameError()">
-              <img class="auth-field__icon" src="assets/icons/person_filled.svg" alt="" />
+              <app-icon class="auth-field__icon" name="person" />
               <input
                 class="auth-field__input"
                 type="text"
@@ -40,7 +40,7 @@
 
           <div class="auth-field">
             <label class="auth-field__pill" [class.auth-field__pill--invalid]="emailError()">
-              <img class="auth-field__icon" src="assets/icons/mail.svg" alt="" />
+              <app-icon class="auth-field__icon" name="mail" />
               <input
                 class="auth-field__input"
                 type="email"
@@ -56,7 +56,7 @@
 
           <div class="auth-field">
             <label class="auth-field__pill" [class.auth-field__pill--invalid]="passwordError()">
-              <img class="auth-field__icon" src="assets/icons/lock.svg" alt="" />
+              <app-icon class="auth-field__icon" name="lock" />
               <input
                 class="auth-field__input"
                 type="password"
@@ -90,21 +90,44 @@
           </div>
         </form>
       } @else {
-        <h1 class="auth-card__title">Avatar wählen</h1>
-        <p class="auth-card__subtitle">Avatar-Auswahl folgt.</p>
+        <h1 class="auth-card__title">Wähle deinen Avatar</h1>
 
-        <p class="auth-form-error" [class.is-visible]="formError()" role="alert">
-          {{ formError() }}
-        </p>
+        <div class="avatar-step">
+          <div class="avatar-step__preview" [class.avatar-step__preview--chosen]="selectedAvatar()">
+            <img [src]="previewSrc()" alt="" />
+          </div>
 
-        <div class="register__actions register__actions--center">
+          <p class="avatar-step__name">{{ form.controls.name.value }}</p>
+          <p class="auth-card__subtitle">Aus der Liste wählen</p>
+
+          <div class="avatar-step__choices">
+            @for (avatar of avatars; track avatar; let i = $index) {
+              <button
+                type="button"
+                class="avatar-step__choice"
+                [class.avatar-step__choice--selected]="selectedAvatar() === avatar"
+                [attr.aria-pressed]="selectedAvatar() === avatar"
+                [attr.aria-label]="'Avatar ' + (i + 1)"
+                (click)="selectAvatar(avatar)"
+              >
+                <img [src]="avatarSrc(avatar)" alt="" />
+              </button>
+            }
+          </div>
+
+          <p class="auth-form-error" [class.is-visible]="avatarError() || formError()" role="alert">
+            {{ avatarError() || formError() }}
+          </p>
+        </div>
+
+        <div class="register__actions">
           <button
             type="button"
-            class="auth-btn auth-btn--primary"
+            class="auth-btn auth-btn--primary register__submit"
             [disabled]="loading()"
             (click)="completeRegistration()"
           >
-            Konto erstellen
+            Weiter
           </button>
         </div>
       }
