@@ -1,0 +1,83 @@
+@use '../../../../styles/functions' as fct;
+@use '../../../../styles/mixins' as mx;
+
+:host {
+  display: block;
+}
+
+.register__back {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  @include mx.flex(row, center, center);
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  outline: none;
+  background: none;
+  cursor: pointer;
+
+  img {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+.register__consent {
+  @include mx.flex(row, flex-start, center);
+  gap: 12px;
+  @include mx.typo(nunito, 400);
+  font-size: 16px;
+  color: fct.color(black);
+
+  a {
+    color: fct.color(purple-2);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.register__checkbox {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  appearance: none;
+  border: 1px solid fct.color(purple-2);
+  border-radius: 4px;
+  cursor: pointer;
+  @include mx.transition(150ms);
+
+  &:checked {
+    background: fct.color(purple-2)
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 13l4 4L19 7'/%3E%3C/svg%3E")
+      center / 14px no-repeat;
+  }
+}
+
+.register__actions {
+  @include mx.flex(row, flex-end, center);
+}
+
+.register__actions--center {
+  justify-content: center;
+}
+
+.register__submit {
+  padding-inline: 32px;
+}
+
+@media (max-width: 480px) {
+  .register__back {
+    top: 16px;
+    left: 16px;
+  }
+
+  .register__consent {
+    font-size: 14px;
+  }
+}

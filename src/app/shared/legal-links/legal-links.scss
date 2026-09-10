@@ -1,0 +1,22 @@
+@use '../../../styles/functions' as fct;
+@use '../../../styles/mixins' as mx;
+
+:host {
+  display: block;
+}
+
+.legal-links {
+  @include mx.flex(row, center, center);
+  gap: 16px;
+
+  a {
+    @include mx.typo(figtree, 400);
+    font-size: 18px;
+    color: fct.color(purple-2);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

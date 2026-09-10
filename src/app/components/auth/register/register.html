@@ -1,1 +1,115 @@
-<p>register works!</p>
+<main class="auth-page">
+  <div class="auth-page__content">
+    <div class="auth-logo">
+      <svg class="auth-logo__icon" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+        <path
+          d="M24 5C12.4 5 3 12.9 3 22.6c0 5.5 3 10.4 7.7 13.6-.5 2.6-1.9 5-3.9 6.8 3.4.2 6.8-.8 9.6-2.8 2.4.7 4.9 1 7.6 1 11.6 0 21-7.9 21-17.6S35.6 5 24 5Z"
+          fill="#797EF3"
+        />
+      </svg>
+      <span class="auth-logo__text">DABubble</span>
+    </div>
+
+    <section class="auth-card">
+      <button type="button" class="register__back" (click)="goBack()" aria-label="Zurück">
+        <img src="assets/icons/arrow_back.svg" alt="" />
+      </button>
+
+      @if (step() === 'form') {
+        <h1 class="auth-card__title">Konto erstellen</h1>
+        <p class="auth-card__subtitle">
+          Mit deinem Namen und deiner E-Mail-Adresse hast du dein neues DABubble-Konto.
+        </p>
+
+        <form class="auth-form" [formGroup]="form" (ngSubmit)="goToAvatarStep()" novalidate>
+          <div class="auth-field">
+            <label class="auth-field__pill" [class.auth-field__pill--invalid]="nameError()">
+              <img class="auth-field__icon" src="assets/icons/person_filled.svg" alt="" />
+              <input
+                class="auth-field__input"
+                type="text"
+                formControlName="name"
+                autocomplete="name"
+                placeholder="Name und Nachname"
+              />
+            </label>
+            <p class="auth-field__error" [class.is-visible]="nameError()" aria-live="polite">
+              {{ nameError() }}
+            </p>
+          </div>
+
+          <div class="auth-field">
+            <label class="auth-field__pill" [class.auth-field__pill--invalid]="emailError()">
+              <img class="auth-field__icon" src="assets/icons/mail.svg" alt="" />
+              <input
+                class="auth-field__input"
+                type="email"
+                formControlName="email"
+                autocomplete="email"
+                placeholder="beispielname@email.com"
+              />
+            </label>
+            <p class="auth-field__error" [class.is-visible]="emailError()" aria-live="polite">
+              {{ emailError() }}
+            </p>
+          </div>
+
+          <div class="auth-field">
+            <label class="auth-field__pill" [class.auth-field__pill--invalid]="passwordError()">
+              <img class="auth-field__icon" src="assets/icons/lock.svg" alt="" />
+              <input
+                class="auth-field__input"
+                type="password"
+                formControlName="password"
+                autocomplete="new-password"
+                placeholder="Passwort"
+              />
+            </label>
+            <p class="auth-field__error" [class.is-visible]="passwordError()" aria-live="polite">
+              {{ passwordError() }}
+            </p>
+          </div>
+
+          <label class="register__consent">
+            <input type="checkbox" class="register__checkbox" formControlName="consent" />
+            <span> Ich stimme der <a routerLink="/privacy">Datenschutzerklärung</a> zu. </span>
+          </label>
+
+          <p class="auth-form-error" [class.is-visible]="formError()" role="alert">
+            {{ formError() }}
+          </p>
+
+          <div class="register__actions">
+            <button
+              type="submit"
+              class="auth-btn auth-btn--primary register__submit"
+              [disabled]="formInvalid()"
+            >
+              Weiter
+            </button>
+          </div>
+        </form>
+      } @else {
+        <h1 class="auth-card__title">Avatar wählen</h1>
+        <p class="auth-card__subtitle">Avatar-Auswahl folgt.</p>
+
+        <p class="auth-form-error" [class.is-visible]="formError()" role="alert">
+          {{ formError() }}
+        </p>
+
+        <div class="register__actions register__actions--center">
+          <button
+            type="button"
+            class="auth-btn auth-btn--primary"
+            [disabled]="loading()"
+            (click)="completeRegistration()"
+          >
+            Konto erstellen
+          </button>
+        </div>
+      }
+    </section>
+
+    <app-legal-links />
+  </div>
+</main>

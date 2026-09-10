@@ -1,10 +1,12 @@
 import { inject, Injectable } from '@angular/core';
 import { FirebaseError } from 'firebase/app';
 import {
+  createUserWithEmailAndPassword,
   GoogleAuthProvider,
   signInAnonymously,
   signInWithEmailAndPassword,
   signInWithPopup,
+  updateProfile,
 } from 'firebase/auth';
 import { FIREBASE_AUTH } from '../firebase/firebase.tokens';
 
@@ -19,6 +21,9 @@ const AUTH_ERROR_MESSAGES: Record<string, string | undefined> = {
   'auth/network-request-failed': 'Netzwerkfehler. Bitte prüfe deine Internetverbindung.',
   'auth/popup-closed-by-user': 'Anmeldung abgebrochen.',
   'auth/popup-blocked': 'Das Anmelde-Popup wurde blockiert. Bitte erlaube Popups.',
+  'auth/email-already-in-use': 'Diese E-Mail-Adresse wird bereits verwendet.',
+  'auth/weak-password': 'Das Passwort ist zu schwach. Mindestens 6 Zeichen.',
+  'auth/operation-not-allowed': 'Diese Anmeldemethode ist nicht aktiviert.',
 };
 
 const FALLBACK_MESSAGE = 'Anmeldung fehlgeschlagen. Bitte versuche es erneut.';
@@ -37,6 +42,11 @@ export class AuthService {
 
   async loginAsGuest(): Promise<void> {
     await signInAnonymously(this.auth);
+  }
+
+  async registerWithEmail(name: string, email: string, password: string): Promise<void> {
+    const credential = await createUserWithEmailAndPassword(this.auth, email, password);
+    await updateProfile(credential.user, { displayName: name });
   }
 
   toMessage(error: unknown): string {
