@@ -1,6 +1,7 @@
 /* Globale Styles. Weitere Partials hier per @use einbinden. */
 @use 'styles/typography';
 @use 'styles/auth';
+@use 'styles/overlay';
 
 *,
 *::before,

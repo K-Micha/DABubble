@@ -127,7 +127,11 @@
             [disabled]="loading()"
             (click)="completeRegistration()"
           >
-            Weiter
+            @if (loading()) {
+              <app-spinner />
+            } @else {
+              Weiter
+            }
           </button>
         </div>
       }
@@ -136,3 +140,9 @@
     <app-legal-links />
   </div>
 </main>
+
+@if (success()) {
+  <div class="toast-overlay" [class.toast-overlay--leaving]="leaving()">
+    <app-toast message="Konto erfolgreich erstellt!" />
+  </div>
+}

@@ -6,6 +6,8 @@
 }
 
 .toast {
+  @include mx.flex(row, center, center);
+  gap: 16px;
   padding: 50px;
   border-radius: 30px;
   background: fct.color(purple-1);
@@ -16,9 +18,21 @@
   box-shadow: 0 6px 10px 0 rgba(0, 0, 0, 0.2);
 }
 
+.toast__icon {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+}
+
 @media (max-width: 480px) {
   .toast {
     padding: 32px;
-    font-size: 28px;
+    gap: 12px;
+    font-size: 24px;
+  }
+
+  .toast__icon {
+    width: 32px;
+    height: 32px;
   }
 }

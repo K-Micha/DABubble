@@ -32,6 +32,13 @@ npm run build
 npx firebase-tools deploy --only hosting
 ```
 
+**TODO vor dem ersten Produktions-Deploy:** In der Firebase Console unter
+Authentication → Templates → „Passwort zurücksetzen" → Aktions-URL von
+`http://localhost:4200/reset-password` auf die echte Domain
+(`https://<domain>/reset-password`) umstellen. Sonst zeigt der Link in der
+Reset-Mail in Produktion ins Leere. Die Domain muss außerdem unter
+Authentication → Settings → Autorisierte Domains stehen.
+
 ## Projektstruktur
 
 ```

@@ -1,6 +1,6 @@
 import { Component, input } from '@angular/core';
 
-export type IconName = 'mail' | 'lock' | 'person' | 'arrow-back';
+export type IconName = 'mail' | 'lock' | 'person' | 'arrow-back' | 'send';
 
 /**
  * Inline-SVG-Icons (kein Asset-Request, per `color` einfärbbar via currentColor).

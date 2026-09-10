@@ -6,7 +6,9 @@ import { AuthService } from '../../../shared/auth/auth.service';
 import { Icon } from '../../../shared/icon/icon';
 import { LegalLinks } from '../../../shared/legal-links/legal-links';
 import { User } from '../../../shared/models';
+import { Spinner } from '../../../shared/spinner/spinner';
 import { UserService } from '../../../shared/user/user.service';
+import { Toast } from '../../overlay/toast/toast';
 
 type RegisterStep = 'form' | 'avatar';
 
@@ -14,7 +16,7 @@ const AVATARS = ['avatar01', 'avatar02', 'avatar03', 'avatar04', 'avatar05', 'av
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, RouterLink, LegalLinks, Icon],
+  imports: [ReactiveFormsModule, RouterLink, LegalLinks, Icon, Spinner, Toast],
   templateUrl: './register.html',
   styleUrl: './register.scss',
 })
@@ -26,6 +28,8 @@ export class Register {
   protected readonly step = signal<RegisterStep>('form');
   protected readonly loading = signal(false);
   protected readonly formError = signal<string | null>(null);
+  protected readonly success = signal(false);
+  protected readonly leaving = signal(false);
 
   protected readonly avatars = AVATARS;
   protected readonly selectedAvatar = signal<string | null>(null);
@@ -102,13 +106,19 @@ export class Register {
     this.formError.set(null);
     try {
       const uid = await this.authService.registerWithEmail(name, email, password);
-      await this.userService.createProfile(this.buildUser(uid, name, email, avatar));
-      await this.router.navigate(['/workspace']);
+      await this.userService.ensureProfile(this.buildUser(uid, name, email, avatar));
+      this.showSuccess();
     } catch (error) {
       this.formError.set(this.authService.toMessage(error));
     } finally {
       this.loading.set(false);
     }
+  }
+
+  private showSuccess(): void {
+    this.success.set(true);
+    setTimeout(() => this.leaving.set(true), 1500);
+    setTimeout(() => void this.router.navigate(['/workspace']), 1700);
   }
 
   private buildUser(id: string, name: string, email: string, avatar: string): User {

@@ -12,6 +12,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../shared/auth/auth.service';
 import { Icon } from '../../../shared/icon/icon';
 import { LegalLinks } from '../../../shared/legal-links/legal-links';
+import { Spinner } from '../../../shared/spinner/spinner';
 import { Toast } from '../../overlay/toast/toast';
 
 function passwordsMatch(group: AbstractControl): ValidationErrors | null {
@@ -22,7 +23,7 @@ function passwordsMatch(group: AbstractControl): ValidationErrors | null {
 
 @Component({
   selector: 'app-reset-password',
-  imports: [ReactiveFormsModule, RouterLink, Icon, LegalLinks, Toast],
+  imports: [ReactiveFormsModule, RouterLink, Icon, LegalLinks, Spinner, Toast],
   templateUrl: './reset-password.html',
   styleUrl: './reset-password.scss',
 })

@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { FIRESTORE } from '../firebase/firebase.tokens';
 import { User } from '../models';
 
@@ -8,8 +8,12 @@ import { User } from '../models';
 export class UserService {
   private readonly firestore = inject(FIRESTORE);
 
-  /** Schreibt das User-Dokument (Doc-ID = User-ID). */
-  async createProfile(user: User): Promise<void> {
-    await setDoc(doc(this.firestore, 'users', user.id), user);
+  /** Legt das User-Dokument an, falls es noch nicht existiert (Doc-ID = User-ID). */
+  async ensureProfile(user: User): Promise<void> {
+    const ref = doc(this.firestore, 'users', user.id);
+    const snapshot = await getDoc(ref);
+    if (!snapshot.exists()) {
+      await setDoc(ref, user);
+    }
   }
 }

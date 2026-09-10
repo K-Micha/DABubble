@@ -9,8 +9,11 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
   updateProfile,
+  type User as FirebaseUser,
 } from 'firebase/auth';
 import { FIREBASE_AUTH } from '../firebase/firebase.tokens';
+import { User } from '../models';
+import { UserService } from '../user/user.service';
 
 /** Deutsche, feldnahe Fehlermeldungen je Firebase-Auth-Fehlercode (DoD: keine Alerts). */
 const AUTH_ERROR_MESSAGES: Record<string, string | undefined> = {
@@ -37,17 +40,33 @@ const FALLBACK_MESSAGE = 'Anmeldung fehlgeschlagen. Bitte versuche es erneut.';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly auth = inject(FIREBASE_AUTH);
+  private readonly userService = inject(UserService);
 
   async loginWithEmail(email: string, password: string): Promise<void> {
     await signInWithEmailAndPassword(this.auth, email, password);
   }
 
   async loginWithGoogle(): Promise<void> {
-    await signInWithPopup(this.auth, new GoogleAuthProvider());
+    const { user } = await signInWithPopup(this.auth, new GoogleAuthProvider());
+    await this.userService.ensureProfile(this.toProfile(user, false));
   }
 
   async loginAsGuest(): Promise<void> {
-    await signInAnonymously(this.auth);
+    const { user } = await signInAnonymously(this.auth);
+    await this.userService.ensureProfile(this.toProfile(user, true));
+  }
+
+  /** Baut ein Default-Profil aus dem Firebase-Auth-User (Google-Daten bzw. Gast). */
+  private toProfile(user: FirebaseUser, guest: boolean): User {
+    return {
+      id: user.uid,
+      name: guest ? 'Gast' : (user.displayName ?? 'Nutzer'),
+      email: guest ? '' : (user.email ?? ''),
+      avatarUrl: guest
+        ? 'img/avatar/profile_blank.svg'
+        : (user.photoURL ?? 'img/avatar/avatar01.svg'),
+      onlineStatus: 'online',
+    };
   }
 
   /** Legt den Auth-Account an, setzt den Anzeigenamen und liefert die neue User-ID. */
@@ -61,10 +80,17 @@ export class AuthService {
    * Schickt eine Passwort-Reset-Mail. `auth/user-not-found` wird bewusst
    * geschluckt (Schutz gegen E-Mail-Enumeration) – der Aufrufer zeigt immer
    * dieselbe neutrale Erfolgsmeldung.
+   * `url` = continueUrl (localhost wie Prod, ohne Hardcoding). Damit der Link
+   * selbst auf /reset-password zeigt, muss zusaetzlich die Action-URL in der
+   * Firebase Console (Auth -> Templates -> Passwort-Reset) angepasst werden.
    */
   async sendResetEmail(email: string): Promise<void> {
+    const actionCodeSettings = {
+      url: window.location.origin + '/reset-password',
+      handleCodeInApp: false,
+    };
     try {
-      await sendPasswordResetEmail(this.auth, email);
+      await sendPasswordResetEmail(this.auth, email, actionCodeSettings);
     } catch (error) {
       if (error instanceof FirebaseError && error.code === 'auth/user-not-found') return;
       throw error;

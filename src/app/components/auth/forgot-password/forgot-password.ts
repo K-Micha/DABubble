@@ -5,10 +5,12 @@ import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../shared/auth/auth.service';
 import { Icon } from '../../../shared/icon/icon';
 import { LegalLinks } from '../../../shared/legal-links/legal-links';
+import { Spinner } from '../../../shared/spinner/spinner';
+import { Toast } from '../../overlay/toast/toast';
 
 @Component({
   selector: 'app-forgot-password',
-  imports: [ReactiveFormsModule, RouterLink, Icon, LegalLinks],
+  imports: [ReactiveFormsModule, RouterLink, Icon, LegalLinks, Spinner, Toast],
   templateUrl: './forgot-password.html',
   styleUrl: './forgot-password.scss',
 })
@@ -18,6 +20,8 @@ export class ForgotPassword {
   protected readonly loading = signal(false);
   protected readonly sent = signal(false);
   protected readonly formError = signal<string | null>(null);
+  protected readonly toastVisible = signal(false);
+  protected readonly toastLeaving = signal(false);
 
   protected readonly email = new FormControl('', {
     nonNullable: true,
@@ -49,10 +53,17 @@ export class ForgotPassword {
     try {
       await this.authService.sendResetEmail(this.email.getRawValue());
       this.sent.set(true);
+      this.playToast();
     } catch (error) {
       this.formError.set(this.authService.toMessage(error));
     } finally {
       this.loading.set(false);
     }
+  }
+
+  private playToast(): void {
+    this.toastVisible.set(true);
+    setTimeout(() => this.toastLeaving.set(true), 1500);
+    setTimeout(() => this.toastVisible.set(false), 1700);
   }
 }

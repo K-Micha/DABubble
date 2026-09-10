@@ -4,10 +4,13 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../shared/auth/auth.service';
 import { Icon } from '../../../shared/icon/icon';
 import { LegalLinks } from '../../../shared/legal-links/legal-links';
+import { Spinner } from '../../../shared/spinner/spinner';
+
+type LoginAction = 'email' | 'google' | 'guest';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, RouterLink, LegalLinks, Icon],
+  imports: [ReactiveFormsModule, RouterLink, LegalLinks, Icon, Spinner],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
@@ -16,6 +19,7 @@ export class Login {
   private readonly router = inject(Router);
 
   protected readonly loading = signal(false);
+  protected readonly pending = signal<LoginAction | null>(null);
   protected readonly formError = signal<string | null>(null);
 
   protected readonly form = new FormGroup({
@@ -36,34 +40,35 @@ export class Login {
       return;
     }
     const { email, password } = this.form.getRawValue();
-    void this.run(() => this.authService.loginWithEmail(email, password));
+    void this.run('email', () => this.authService.loginWithEmail(email, password));
   }
 
   protected onGoogleLogin(): void {
     if (this.loading()) return;
-    void this.run(() => this.authService.loginWithGoogle());
+    void this.run('google', () => this.authService.loginWithGoogle());
   }
 
   protected onGuestLogin(): void {
     if (this.loading()) return;
-    void this.run(() => this.authService.loginAsGuest());
+    void this.run('guest', () => this.authService.loginAsGuest());
   }
 
-  private async run(action: () => Promise<void>): Promise<void> {
-    this.setBusy(true);
+  private async run(action: LoginAction, task: () => Promise<void>): Promise<void> {
+    this.setBusy(action);
     try {
-      await action();
+      await task();
       await this.router.navigate(['/workspace']);
     } catch (error) {
       this.formError.set(this.authService.toMessage(error));
     } finally {
-      this.setBusy(false);
+      this.setBusy(null);
     }
   }
 
-  private setBusy(value: boolean): void {
-    this.loading.set(value);
-    if (value) this.formError.set(null);
+  private setBusy(action: LoginAction | null): void {
+    this.loading.set(action !== null);
+    this.pending.set(action);
+    if (action) this.formError.set(null);
   }
 
   protected emailError(): string | null {
