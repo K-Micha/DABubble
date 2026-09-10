@@ -44,9 +44,9 @@
               placeholder="beispielname@email.com"
             />
           </label>
-          @if (emailError(); as message) {
-            <p class="field__error">{{ message }}</p>
-          }
+          <p class="input-error" [class.is-visible]="emailError()" aria-live="polite">
+            {{ emailError() }}
+          </p>
         </div>
 
         <div class="field">
@@ -75,16 +75,16 @@
               placeholder="Passwort"
             />
           </label>
-          @if (passwordError(); as message) {
-            <p class="field__error">{{ message }}</p>
-          }
+          <p class="input-error" [class.is-visible]="passwordError()" aria-live="polite">
+            {{ passwordError() }}
+          </p>
         </div>
 
         <a class="login__forgot" routerLink="/forgot-password">Passwort vergessen?</a>
 
-        @if (formError(); as message) {
-          <p class="login__form-error" role="alert">{{ message }}</p>
-        }
+        <p class="login__form-error" [class.is-visible]="formError()" role="alert">
+          {{ formError() }}
+        </p>
 
         <div class="login__actions">
           <div class="login__divider"><span>ODER</span></div>

@@ -15,9 +15,9 @@
 }
 
 .login__topbar {
-  @include mx.flex(row, flex-end, center);
-  flex-wrap: wrap;
-  gap: 8px 16px;
+  @include mx.flex(column, flex-start, flex-end);
+  gap: 4px;
+  text-align: right;
 }
 
 .login__topbar-text {
@@ -113,11 +113,20 @@
   outline: 1px solid fct.color(error);
 }
 
-.field__error {
-  margin: 6px 0 0 32px;
+// Fehlertext-Slot: reserviert immer Platz (nur visibility toggeln), kein Layout-Sprung.
+.input-error {
+  min-height: 19px;
+  margin-top: 6px;
+  padding-left: 32px;
   @include mx.typo(nunito, 400);
   font-size: 14px;
+  line-height: 19px;
   color: fct.color(error);
+  visibility: hidden;
+
+  &.is-visible {
+    visibility: visible;
+  }
 }
 
 .login__forgot {
@@ -133,12 +142,21 @@
   }
 }
 
+// Formular-Fehler-Slot (z. B. "Anmeldung fehlgeschlagen."): reserviert immer
+// 2 Zeilen, nur visibility toggeln -> ODER/Buttons springen nie.
 .login__form-error {
+  min-height: 40px;
   margin: 0;
   text-align: center;
   @include mx.typo(nunito, 500);
   font-size: 16px;
+  line-height: 20px;
   color: fct.color(error);
+  visibility: hidden;
+
+  &.is-visible {
+    visibility: visible;
+  }
 }
 
 .login__actions {
@@ -262,7 +280,7 @@
     padding: 14px 20px;
   }
 
-  .field__error {
-    margin-left: 20px;
+  .input-error {
+    padding-left: 20px;
   }
 }
