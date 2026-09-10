@@ -20,6 +20,16 @@
 
 /* @include mx.typo(nokora, 700); */
 
+// Figma-Textstyle "Bold Display" – Headline der Auth-Screens (Login, Register, ...)
+@mixin display-title {
+  @include typo(nunito, 700);
+  font-size: 46px;
+  text-align: center;
+  color: fct.color(purple-1);
+}
+
+/* @include mx.display-title; */
+
 @mixin transition(
   $duration: 250ms,
   $timing: ease-in-out

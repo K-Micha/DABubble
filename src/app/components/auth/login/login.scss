@@ -1,0 +1,268 @@
+@use '../../../../styles/functions' as fct;
+@use '../../../../styles/mixins' as mx;
+
+:host {
+  display: block;
+  min-height: 100dvh;
+  background: fct.color(background);
+}
+
+.login {
+  @include mx.flex(column, flex-start, stretch);
+  min-height: 100dvh;
+  padding: 32px 16px;
+  background: fct.color(background);
+}
+
+.login__topbar {
+  @include mx.flex(row, flex-end, center);
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+
+.login__topbar-text {
+  @include mx.typo(nunito, 400);
+  font-size: 18px;
+  color: fct.color(black);
+}
+
+.login__content {
+  @include mx.flex(column, center, center);
+  flex: 1 1 auto;
+  gap: 40px;
+  padding: 24px 0;
+}
+
+.login__logo {
+  @include mx.flex(row, center, center);
+  gap: 16px;
+
+  span {
+    @include mx.typo(nunito, 700);
+    font-size: 32px;
+    color: fct.color(purple-3);
+  }
+}
+
+.login__logo-icon {
+  width: 48px;
+  height: 48px;
+}
+
+.login__card {
+  width: 100%;
+  max-width: 600px;
+  @include mx.flex(column, flex-start, stretch);
+  gap: 24px;
+  padding: 40px;
+  border-radius: 30px;
+  background: fct.color(white);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.login__title {
+  @include mx.display-title;
+  margin: 0;
+}
+
+.login__hint {
+  margin: 0;
+  text-align: center;
+  @include mx.typo(nunito, 400);
+  font-size: 20px;
+  color: fct.color(black);
+}
+
+.login__form {
+  @include mx.flex(column, flex-start, stretch);
+  gap: 16px;
+}
+
+.input-pill {
+  @include mx.flex(row, flex-start, center);
+  gap: 16px;
+  padding: 18px 32px;
+  border-radius: 100px;
+  background: fct.color(background);
+  cursor: text;
+
+  input {
+    flex: 1 1 auto;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    @include mx.typo(nunito, 500);
+    font-size: 18px;
+    color: fct.color(text-gray);
+
+    &::placeholder {
+      color: fct.color(text-gray);
+    }
+  }
+}
+
+.input-pill__icon {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  color: fct.color(purple-1);
+}
+
+.input-pill--invalid {
+  outline: 1px solid fct.color(error);
+}
+
+.field__error {
+  margin: 6px 0 0 32px;
+  @include mx.typo(nunito, 400);
+  font-size: 14px;
+  color: fct.color(error);
+}
+
+.login__forgot {
+  align-self: flex-end;
+  @include mx.typo(figtree, 400);
+  font-size: 18px;
+  color: fct.color(purple-2);
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.login__form-error {
+  margin: 0;
+  text-align: center;
+  @include mx.typo(nunito, 500);
+  font-size: 16px;
+  color: fct.color(error);
+}
+
+.login__actions {
+  @include mx.flex(column, center, center);
+  gap: 16px;
+}
+
+.login__actions-row {
+  @include mx.flex(row, center, center);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.login__divider {
+  @include mx.flex(row, center, center);
+  align-self: stretch;
+  gap: 16px;
+  @include mx.typo(nunito, 400);
+  font-size: 18px;
+  color: fct.color(black);
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1 1 auto;
+    height: 1px;
+    background: fct.color(light-purple);
+  }
+}
+
+.btn {
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 28px;
+  border-radius: 25px;
+  @include mx.typo(nunito, 700);
+  font-size: 18px;
+  @include mx.transition();
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+}
+
+.btn--primary {
+  background: fct.color(purple-1);
+  color: fct.color(white);
+
+  &:hover:not(:disabled) {
+    background: fct.color(purple-2);
+  }
+}
+
+.btn--google {
+  @include mx.flex(row, center, center);
+  gap: 12px;
+  background: fct.color(white);
+  color: fct.color(black);
+  border: 1px solid fct.color(light-purple);
+
+  &:hover:not(:disabled) {
+    background: fct.color(background);
+  }
+}
+
+.btn--guest {
+  background: fct.color(white);
+  color: fct.color(purple-2);
+  border: 1px solid fct.color(purple-2);
+
+  &:hover:not(:disabled) {
+    background: fct.color(background);
+  }
+}
+
+.btn__icon {
+  width: 24px;
+  height: 24px;
+}
+
+.login__signup-link {
+  @include mx.typo(figtree, 400);
+  font-size: 18px;
+  color: fct.color(purple-2);
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+@media (max-width: 480px) {
+  .login__content {
+    gap: 32px;
+  }
+
+  .login__card {
+    padding: 24px 16px;
+  }
+
+  .login__title {
+    font-size: 32px;
+  }
+
+  .login__hint {
+    font-size: 16px;
+  }
+
+  .login__topbar-text {
+    font-size: 16px;
+  }
+
+  .login__signup-link {
+    font-size: 16px;
+  }
+
+  .input-pill {
+    padding: 14px 20px;
+  }
+
+  .field__error {
+    margin-left: 20px;
+  }
+}
