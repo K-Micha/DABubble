@@ -4,10 +4,11 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../shared/auth/auth.service';
 import { Icon } from '../../../shared/icon/icon';
 import { LegalLinks } from '../../../shared/legal-links/legal-links';
+import { Header } from '../../workspace/header/header';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, RouterLink, LegalLinks, Icon],
+  imports: [ReactiveFormsModule, RouterLink, LegalLinks, Icon, Header],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
