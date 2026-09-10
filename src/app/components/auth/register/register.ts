@@ -3,24 +3,34 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../shared/auth/auth.service';
+import { Icon } from '../../../shared/icon/icon';
 import { LegalLinks } from '../../../shared/legal-links/legal-links';
 import { Header } from '../../workspace/header/header';
+import { User } from '../../../shared/models';
+import { UserService } from '../../../shared/user/user.service';
 
 type RegisterStep = 'form' | 'avatar';
 
+const AVATARS = ['avatar01', 'avatar02', 'avatar03', 'avatar04', 'avatar05', 'avatar06'];
+
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, RouterLink, LegalLinks, Header],
+  imports: [ReactiveFormsModule, RouterLink, LegalLinks, Icon, Header],
   templateUrl: './register.html',
   styleUrl: './register.scss',
 })
 export class Register {
   private readonly authService = inject(AuthService);
+  private readonly userService = inject(UserService);
   private readonly router = inject(Router);
 
   protected readonly step = signal<RegisterStep>('form');
   protected readonly loading = signal(false);
   protected readonly formError = signal<string | null>(null);
+
+  protected readonly avatars = AVATARS;
+  protected readonly selectedAvatar = signal<string | null>(null);
+  protected readonly avatarError = signal<string | null>(null);
 
   protected readonly form = new FormGroup({
     name: new FormControl('', {
@@ -46,6 +56,20 @@ export class Register {
   });
   protected readonly formInvalid = computed(() => this.status() !== 'VALID');
 
+  protected avatarSrc(name: string): string {
+    return `img/avatar/${name}.svg`;
+  }
+
+  protected previewSrc(): string {
+    const chosen = this.selectedAvatar();
+    return chosen ? this.avatarSrc(chosen) : 'img/avatar/profile_blank.svg';
+  }
+
+  protected selectAvatar(name: string): void {
+    this.selectedAvatar.set(name);
+    this.avatarError.set(null);
+  }
+
   protected goToAvatarStep(): void {
     if (this.formInvalid()) {
       this.form.markAllAsTouched();
@@ -63,24 +87,39 @@ export class Register {
     void this.router.navigate(['/login']);
   }
 
-  protected async completeRegistration(): Promise<void> {
+  protected completeRegistration(): void {
     if (this.loading()) return;
+    const avatar = this.selectedAvatar();
+    if (!avatar) {
+      this.avatarError.set('Bitte wähle einen Avatar aus.');
+      return;
+    }
+    void this.runRegistration(avatar);
+  }
+
+  private async runRegistration(avatar: string): Promise<void> {
     const { name, email, password } = this.form.getRawValue();
     this.loading.set(true);
     this.formError.set(null);
     try {
-      await this.authService.registerWithEmail(name, email, password);
+      const uid = await this.authService.registerWithEmail(name, email, password);
+      await this.userService.createProfile(this.buildUser(uid, name, email, avatar));
       await this.router.navigate(['/workspace']);
     } catch (error) {
-      this.handleError(error);
+      this.formError.set(this.authService.toMessage(error));
     } finally {
       this.loading.set(false);
     }
   }
 
-  private handleError(error: unknown): void {
-    this.formError.set(this.authService.toMessage(error));
-    this.step.set('form');
+  private buildUser(id: string, name: string, email: string, avatar: string): User {
+    return {
+      id,
+      name,
+      email,
+      avatarUrl: this.avatarSrc(avatar),
+      onlineStatus: 'online',
+    };
   }
 
   protected nameError(): string | null {

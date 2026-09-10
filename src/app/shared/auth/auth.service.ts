@@ -24,6 +24,8 @@ const AUTH_ERROR_MESSAGES: Record<string, string | undefined> = {
   'auth/email-already-in-use': 'Diese E-Mail-Adresse wird bereits verwendet.',
   'auth/weak-password': 'Das Passwort ist zu schwach. Mindestens 6 Zeichen.',
   'auth/operation-not-allowed': 'Diese Anmeldemethode ist nicht aktiviert.',
+  'permission-denied': 'Speichern nicht erlaubt. Bitte prüfe die Firestore-Regeln.',
+  unavailable: 'Dienst nicht erreichbar. Bitte versuche es später erneut.',
 };
 
 const FALLBACK_MESSAGE = 'Anmeldung fehlgeschlagen. Bitte versuche es erneut.';
@@ -44,9 +46,11 @@ export class AuthService {
     await signInAnonymously(this.auth);
   }
 
-  async registerWithEmail(name: string, email: string, password: string): Promise<void> {
+  /** Legt den Auth-Account an, setzt den Anzeigenamen und liefert die neue User-ID. */
+  async registerWithEmail(name: string, email: string, password: string): Promise<string> {
     const credential = await createUserWithEmailAndPassword(this.auth, email, password);
     await updateProfile(credential.user, { displayName: name });
+    return credential.user.uid;
   }
 
   toMessage(error: unknown): string {
