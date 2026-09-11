@@ -9,49 +9,46 @@ export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    loadComponent: () =>
-      import('./components/intro/intro').then((m) => m.Intro),
+    loadComponent: () => import('./components/intro/intro').then((m) => m.Intro),
   },
   {
     path: 'login',
-    loadComponent: () =>
-      import('./components/auth/login/login').then((m) => m.Login),
+    title: 'Anmeldung – DABubble',
+    loadComponent: () => import('./components/auth/login/login').then((m) => m.Login),
   },
   {
     path: 'register',
-    loadComponent: () =>
-      import('./components/auth/register/register').then((m) => m.Register),
+    title: 'Konto erstellen – DABubble',
+    loadComponent: () => import('./components/auth/register/register').then((m) => m.Register),
   },
   {
     path: 'forgot-password',
+    title: 'Passwort vergessen – DABubble',
     loadComponent: () =>
-      import('./components/auth/forgot-password/forgot-password').then(
-        (m) => m.ForgotPassword,
-      ),
+      import('./components/auth/forgot-password/forgot-password').then((m) => m.ForgotPassword),
   },
   {
     path: 'reset-password',
+    title: 'Neues Passwort – DABubble',
     loadComponent: () =>
-      import('./components/auth/reset-password/reset-password').then(
-        (m) => m.ResetPassword,
-      ),
+      import('./components/auth/reset-password/reset-password').then((m) => m.ResetPassword),
   },
   {
     // TODO Sprint 1: durch Workspace-Shell ersetzen (Header + Sidebar + Kind-Routes
     // fuer Chat/Thread/New-Message). Besitzer: Milos (Shell) + Michael (Chat-Layout).
     path: 'workspace',
-    loadComponent: () =>
-      import('./components/workspace/chat/chat').then((m) => m.Chat),
+    title: 'Workspace – DABubble',
+    loadComponent: () => import('./components/workspace/chat/chat').then((m) => m.Chat),
   },
   {
     path: 'imprint',
-    loadComponent: () =>
-      import('./pages/imprint/imprint').then((m) => m.Imprint),
+    title: 'Impressum – DABubble',
+    loadComponent: () => import('./pages/imprint/imprint').then((m) => m.Imprint),
   },
   {
     path: 'privacy',
-    loadComponent: () =>
-      import('./pages/privacy/privacy').then((m) => m.Privacy),
+    title: 'Datenschutz – DABubble',
+    loadComponent: () => import('./pages/privacy/privacy').then((m) => m.Privacy),
   },
   { path: '**', redirectTo: '' },
 ];
