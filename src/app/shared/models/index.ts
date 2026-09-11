@@ -19,6 +19,7 @@ export interface Channel {
   description: string;
   memberIds: string[];
   createdBy: string;
+  createdAt: number;
 }
 
 export interface Reaction {
