@@ -23,6 +23,7 @@ export class Login {
   protected readonly loading = signal(false);
   protected readonly pending = signal<LoginAction | null>(null);
   protected readonly formError = signal<string | null>(null);
+  protected readonly showPassword = signal(false);
 
   protected readonly form = new FormGroup({
     email: new FormControl('', {
@@ -104,5 +105,9 @@ export class Login {
     }
 
     return 'Passwort ist erforderlich.';
+  }
+
+  protected togglePasswordVisibility(): void {
+    this.showPassword.update((visible) => !visible);
   }
 }

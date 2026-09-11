@@ -31,6 +31,7 @@ export class Register {
   protected readonly formError = signal<string | null>(null);
   protected readonly success = signal(false);
   protected readonly leaving = signal(false);
+  protected readonly showPassword = signal(false);
 
   protected readonly avatars = AVATARS;
   protected readonly selectedAvatar = signal<string | null>(null);
@@ -148,5 +149,9 @@ export class Register {
     const control = this.form.controls.password;
     if (!control.touched || !control.errors) return null;
     return 'Bitte geben Sie ein Passwort ein.';
+  }
+
+  protected togglePasswordVisibility(): void {
+    this.showPassword.update((visible) => !visible);
   }
 }

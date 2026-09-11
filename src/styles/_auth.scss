@@ -88,6 +88,23 @@
   }
 }
 
+// Passwort-Sichtbarkeits-Toggle, rechts in der Pille.
+.auth-field__toggle {
+  @include mx.flex(row, center, center);
+  flex: 0 0 auto;
+  padding: 0;
+  border: none;
+  outline: none;
+  background: none;
+  color: fct.color(text-gray);
+  cursor: pointer;
+
+  app-icon {
+    width: 22px;
+    height: 22px;
+  }
+}
+
 // Fehlertext-Slot: immer im DOM, nur visibility toggeln -> kein Layout-Sprung.
 .auth-field__error {
   min-height: 19px;

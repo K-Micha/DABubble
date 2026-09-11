@@ -38,6 +38,8 @@ export class ResetPassword {
   protected readonly success = signal(false);
   protected readonly leaving = signal(false);
   protected readonly formError = signal<string | null>(null);
+  protected readonly showPassword = signal(false);
+  protected readonly showConfirm = signal(false);
 
   protected readonly form = new FormGroup(
     {
@@ -90,5 +92,10 @@ export class ResetPassword {
     this.success.set(true);
     setTimeout(() => this.leaving.set(true), 1100);
     setTimeout(() => void this.router.navigate(['/login']), 1300);
+  }
+
+  protected togglePasswordVisibility(field: 'password' | 'confirm'): void {
+    const target = field === 'password' ? this.showPassword : this.showConfirm;
+    target.update((visible) => !visible);
   }
 }

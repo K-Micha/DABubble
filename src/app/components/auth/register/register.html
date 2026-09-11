@@ -47,11 +47,19 @@
               <app-icon class="auth-field__icon" name="lock" />
               <input
                 class="auth-field__input"
-                type="password"
+                [type]="showPassword() ? 'text' : 'password'"
                 formControlName="password"
                 autocomplete="new-password"
                 placeholder="Passwort"
               />
+              <button
+                type="button"
+                class="auth-field__toggle"
+                (click)="togglePasswordVisibility()"
+                [attr.aria-label]="showPassword() ? 'Passwort verbergen' : 'Passwort anzeigen'"
+              >
+                <app-icon [name]="showPassword() ? 'eye-off' : 'eye'" />
+              </button>
             </label>
             <p class="auth-field__error" [class.is-visible]="passwordError()" aria-live="polite">
               {{ passwordError() }}
