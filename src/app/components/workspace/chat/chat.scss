@@ -1,0 +1,27 @@
+@use '../../../../styles/functions' as fct;
+@use '../../../../styles/mixins' as mx;
+
+:host {
+  display: block;
+  height: 100dvh;
+}
+
+.workspace {
+  @include mx.flex(column, flex-start, stretch);
+  height: 100%;
+  background: fct.color(background);
+}
+
+.workspace__columns {
+  flex: 1 1 auto;
+  min-height: 0;
+  @include mx.flex(row, flex-start, stretch);
+  gap: 20px;
+  padding: 20px 32px 32px;
+}
+
+@media (max-width: 1100px) {
+  .workspace__columns {
+    overflow-x: auto;
+  }
+}

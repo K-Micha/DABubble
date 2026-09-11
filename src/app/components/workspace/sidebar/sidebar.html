@@ -1,1 +1,104 @@
-<p>sidebar works!</p>
+<aside class="sidebar">
+  <div class="sidebar__head">
+    <span class="sidebar__head-name">DABubble</span>
+    <button type="button" class="sidebar__head-edit" aria-label="Workspace bearbeiten">
+      <app-icon name="edit" />
+    </button>
+  </div>
+
+  <section class="sidebar__section">
+    <div class="sidebar__section-head">
+      <button
+        type="button"
+        class="sidebar__toggle"
+        [class.sidebar__toggle--collapsed]="!channelsExpanded()"
+        (click)="toggleChannels()"
+      >
+        <app-icon name="chevron-down" />
+        <span>Channels</span>
+      </button>
+      <button
+        type="button"
+        class="sidebar__add"
+        (click)="onAddChannel()"
+        aria-label="Channel hinzufügen"
+      >
+        <app-icon name="plus" />
+      </button>
+    </div>
+
+    @if (channelsExpanded()) {
+      <ul class="sidebar__list">
+        @for (channel of channels(); track channel.id) {
+          <li>
+            <button
+              type="button"
+              class="sidebar__item"
+              [class.sidebar__item--active]="selectedChannelId() === channel.id"
+              (click)="selectChannel(channel)"
+            >
+              <app-icon name="hash" />
+              <span>{{ channel.name }}</span>
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+
+  <section class="sidebar__section">
+    <div class="sidebar__section-head">
+      <button
+        type="button"
+        class="sidebar__toggle"
+        [class.sidebar__toggle--collapsed]="!dmsExpanded()"
+        (click)="toggleDms()"
+      >
+        <app-icon name="chevron-down" />
+        <span>Direktnachrichten</span>
+      </button>
+    </div>
+
+    @if (dmsExpanded()) {
+      <ul class="sidebar__list">
+        @for (user of users(); track user.id) {
+          <li>
+            <button
+              type="button"
+              class="sidebar__item"
+              [class.sidebar__item--active]="selectedUserId() === user.id"
+              (click)="selectUser(user)"
+            >
+              <span class="sidebar__item-avatar">
+                <img [src]="user.avatarUrl" alt="" />
+                <span class="sidebar__item-dot"></span>
+              </span>
+              <span>{{ user.name }}</span>
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+</aside>
+
+@switch (activeDialog()) {
+  @case ('create') {
+    <app-channel-create (closed)="onCreateClosed()" (created)="onChannelCreated($event)" />
+  }
+  @case ('add-members') {
+    @if (dialogChannelId(); as id) {
+      <app-channel-add-members [channelId]="id" (closed)="onAddMembersClosed()" />
+    }
+  }
+  @case ('channel-info') {
+    @if (dialogChannelId(); as id) {
+      <app-channel-info [channelId]="id" (closed)="onChannelInfoClosed()" />
+    }
+  }
+  @case ('profile') {
+    @if (dialogUserId(); as id) {
+      <app-profile-card [userId]="id" (closed)="onProfileClosed()" />
+    }
+  }
+}

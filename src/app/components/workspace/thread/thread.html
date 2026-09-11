@@ -1,1 +1,30 @@
-<p>thread works!</p>
+<section class="thread">
+  <header class="thread__head">
+    <div class="thread__head-title">
+      <h1>Thread</h1>
+      <span class="thread__tag">
+        <app-icon name="hash" />
+        {{ channelTag }}
+      </span>
+    </div>
+    <button type="button" class="thread__close" (click)="onClose()" aria-label="Thread schließen">
+      <app-icon name="close" />
+    </button>
+  </header>
+
+  <div class="thread__body">
+    <p>Antworten erscheinen hier</p>
+  </div>
+
+  <div class="thread__input">
+    <textarea class="thread__input-field" placeholder="Antworten..." rows="1"></textarea>
+    <div class="thread__input-row">
+      <button type="button" class="thread__input-icon" aria-label="Datei anhängen">
+        <app-icon name="attachment" />
+      </button>
+      <button type="button" class="thread__send" aria-label="Senden">
+        <app-icon name="send" />
+      </button>
+    </div>
+  </div>
+</section>

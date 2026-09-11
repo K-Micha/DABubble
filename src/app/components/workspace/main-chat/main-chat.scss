@@ -3,12 +3,12 @@
 
 :host {
   display: block;
-  flex: 0 0 485px;
+  flex: 1 1 auto;
   min-width: 0;
   height: 100%;
 }
 
-.thread {
+.main-chat {
   @include mx.flex(column, flex-start, stretch);
   gap: 16px;
   height: 100%;
@@ -18,44 +18,59 @@
   background: fct.color(white);
 }
 
-.thread__head {
+.main-chat__head {
   @include mx.flex(row, space-between, center);
   gap: 16px;
 }
 
-.thread__head-title {
+.main-chat__head-title {
   @include mx.flex(row, flex-start, center);
   gap: 12px;
   min-width: 0;
 
+  app-icon {
+    flex: 0 0 auto;
+    color: fct.color(black);
+  }
+
   h1 {
     margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     @include mx.typo(nunito, 700);
     font-size: 24px;
     color: fct.color(black);
   }
 }
 
-.thread__tag {
-  @include mx.flex(row, flex-start, center);
-  gap: 4px;
-  padding: 4px 12px;
-  border-radius: 100px;
-  background: fct.color(background);
-  @include mx.typo(nunito, 500);
-  font-size: 14px;
-  color: fct.color(text-gray);
+.main-chat__members {
+  @include mx.flex(row, flex-end, center);
+  flex: 0 0 auto;
+  gap: 12px;
+}
 
-  app-icon {
-    width: 14px;
-    height: 14px;
+.main-chat__avatars {
+  @include mx.flex(row, flex-start, center);
+
+  img {
+    width: 36px;
+    height: 36px;
+    margin-left: -10px;
+    border: 2px solid fct.color(white);
+    border-radius: 50%;
+    object-fit: cover;
+
+    &:first-child {
+      margin-left: 0;
+    }
   }
 }
 
-.thread__close {
+.main-chat__add {
   flex: 0 0 auto;
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border: none;
   outline: none;
   border-radius: 50%;
@@ -70,22 +85,21 @@
   }
 
   app-icon {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
   }
 }
 
-.thread__body {
+.main-chat__body {
   flex: 1 1 auto;
   min-height: 0;
   @include mx.flex(row, center, center);
-  text-align: center;
   @include mx.typo(nunito, 400);
   font-size: 18px;
   color: fct.color(text-gray);
 }
 
-.thread__input {
+.main-chat__input {
   flex: 0 0 auto;
   @include mx.flex(column, flex-start, stretch);
   gap: 8px;
@@ -94,7 +108,7 @@
   border-radius: 20px;
 }
 
-.thread__input-field {
+.main-chat__input-field {
   width: 100%;
   border: none;
   outline: none;
@@ -109,11 +123,11 @@
   }
 }
 
-.thread__input-row {
+.main-chat__input-row {
   @include mx.flex(row, space-between, center);
 }
 
-.thread__input-icon {
+.main-chat__input-icon {
   flex: 0 0 auto;
   width: 28px;
   height: 28px;
@@ -134,7 +148,7 @@
   }
 }
 
-.thread__send {
+.main-chat__send {
   flex: 0 0 auto;
   width: 36px;
   height: 36px;

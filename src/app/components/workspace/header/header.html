@@ -25,14 +25,19 @@
   }
 
   @if (variant === 'app') {
-    <div class="header__search">
+    <label class="header__search">
+      <app-icon name="search" />
       <input type="text" placeholder="Devspace durchsuchen" />
-    </div>
+    </label>
 
-    <div class="header__user">
-      <span>Frederik Beck</span>
-      <img src="img/avatar/profile_blank.svg" alt="" />
-    </div>
+    <button type="button" class="header__user" (click)="onAvatarClick()">
+      <span class="header__user-name">{{ currentUser()?.name }}</span>
+      <span class="header__user-avatar">
+        <img [src]="currentUser()?.avatarUrl ?? 'img/avatar/profile_blank.svg'" alt="" />
+        <span class="header__user-dot"></span>
+      </span>
+      <app-icon name="chevron-down" />
+    </button>
   }
 
   @if (variant === 'mobile') {
@@ -41,3 +46,7 @@
     </div>
   }
 </header>
+
+@if (showProfile() && currentUid(); as uid) {
+  <app-profile-card [userId]="uid" (closed)="onProfileClosed()" />
+}

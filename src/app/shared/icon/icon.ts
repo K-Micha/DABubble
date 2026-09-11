@@ -14,7 +14,11 @@ export type IconName =
   | 'radio-unchecked'
   | 'edit'
   | 'message'
-  | 'check';
+  | 'check'
+  | 'search'
+  | 'chevron-down'
+  | 'plus'
+  | 'attachment';
 
 /**
  * Inline-SVG-Icons (kein Asset-Request, per `color` einfärbbar via currentColor).

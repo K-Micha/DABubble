@@ -1,5 +1,13 @@
 import { inject, Injectable } from '@angular/core';
-import { arrayRemove, collection, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import {
+  arrayRemove,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  setDoc,
+  updateDoc,
+} from 'firebase/firestore';
 import { FIRESTORE } from '../firebase/firebase.tokens';
 import { Channel } from '../models';
 
@@ -22,6 +30,12 @@ export class ChannelService {
     };
     await setDoc(ref, channel);
     return channel.id;
+  }
+
+  /** Liefert alle Channels (z. B. fuer die Sidebar-Liste). */
+  async listChannels(): Promise<Channel[]> {
+    const snapshot = await getDocs(collection(this.firestore, 'channels'));
+    return snapshot.docs.map((entry) => entry.data() as Channel);
   }
 
   /** Ueberschreibt die Mitgliederliste eines bestehenden Channels. */
