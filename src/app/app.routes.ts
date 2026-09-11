@@ -1,9 +1,9 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './shared/auth/auth.guard';
 
 /**
  * Routing-Grundgeruest (Sprint 0). Lazy geladen ueber loadComponent.
- * Auth-Guards und die Workspace-Shell (Header + Sidebar + <router-outlet>)
- * folgen in Sprint 1.
+ * Die Workspace-Shell (Header + Sidebar + Kind-Routen) folgt in Sprint 1.
  */
 export const routes: Routes = [
   {
@@ -36,8 +36,10 @@ export const routes: Routes = [
   {
     // TODO Sprint 1: durch Workspace-Shell ersetzen (Header + Sidebar + Kind-Routes
     // fuer Chat/Thread/New-Message). Besitzer: Milos (Shell) + Michael (Chat-Layout).
+    // canActivate greift auch fuer alle kuenftigen Kind-Routen dieser Route.
     path: 'workspace',
     title: 'Workspace – DABubble',
+    canActivate: [authGuard],
     loadComponent: () => import('./components/workspace/chat/chat').then((m) => m.Chat),
   },
   {

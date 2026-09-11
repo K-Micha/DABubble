@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { AuthService } from '../../../shared/auth/auth.service';
 import { Icon } from '../../../shared/icon/icon';
@@ -19,6 +19,7 @@ type LoginAction = 'email' | 'google' | 'guest';
 export class Login {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   protected readonly loading = signal(false);
   protected readonly pending = signal<LoginAction | null>(null);
@@ -66,12 +67,16 @@ export class Login {
 
     try {
       await task();
-      await this.router.navigate(['/workspace']);
+      await this.router.navigateByUrl(this.returnUrl());
     } catch (error) {
       this.formError.set(this.authService.toMessage(error));
     } finally {
       this.setBusy(null);
     }
+  }
+
+  private returnUrl(): string {
+    return this.route.snapshot.queryParamMap.get('returnUrl') ?? '/workspace';
   }
 
   private setBusy(action: LoginAction | null): void {
