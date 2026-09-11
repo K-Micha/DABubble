@@ -12,7 +12,9 @@ export type IconName =
   | 'hash'
   | 'radio-checked'
   | 'radio-unchecked'
-  | 'edit';
+  | 'edit'
+  | 'message'
+  | 'check';
 
 /**
  * Inline-SVG-Icons (kein Asset-Request, per `color` einfärbbar via currentColor).
