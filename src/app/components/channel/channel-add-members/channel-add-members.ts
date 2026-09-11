@@ -5,6 +5,7 @@ import { Icon } from '../../../shared/icon/icon';
 import { User } from '../../../shared/models';
 import { Spinner } from '../../../shared/spinner/spinner';
 import { UserService } from '../../../shared/user/user.service';
+import { Toast } from '../../overlay/toast/toast';
 
 type MemberMode = 'all' | 'specific';
 
@@ -15,7 +16,7 @@ type MemberMode = 'all' | 'specific';
  */
 @Component({
   selector: 'app-channel-add-members',
-  imports: [Icon, Spinner],
+  imports: [Icon, Spinner, Toast],
   templateUrl: './channel-add-members.html',
   styleUrl: './channel-add-members.scss',
 })
@@ -34,6 +35,8 @@ export class ChannelAddMembers {
   protected readonly selectedUserIds = signal<ReadonlySet<string>>(new Set());
   protected readonly loading = signal(false);
   protected readonly formError = signal<string | null>(null);
+  protected readonly success = signal(false);
+  protected readonly leaving = signal(false);
 
   protected readonly formInvalid = computed(
     () => this.mode() === 'specific' && this.selectedUserIds().size === 0,
@@ -89,12 +92,19 @@ export class ChannelAddMembers {
 
     try {
       await this.channelService.setMembers(this.channelId(), this.buildMemberIds());
-      this.closed.emit();
+      this.showSuccess();
     } catch {
       this.formError.set('Mitglieder konnten nicht gespeichert werden. Bitte versuche es erneut.');
     } finally {
       this.loading.set(false);
     }
+  }
+
+  /** Kurze Erfolgs-Blase (wie Reset-Password), dann Dialog schliessen. */
+  private showSuccess(): void {
+    this.success.set(true);
+    setTimeout(() => this.leaving.set(true), 1100);
+    setTimeout(() => this.closed.emit(), 1300);
   }
 
   /** Der Channel-Ersteller ist immer dabei, egal welche Option gewaehlt wurde. */

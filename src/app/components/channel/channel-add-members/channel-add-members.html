@@ -75,3 +75,9 @@
     </div>
   </section>
 </div>
+
+@if (success()) {
+  <div class="toast-overlay" [class.toast-overlay--leaving]="leaving()">
+    <app-toast message="Channel erstellt" />
+  </div>
+}
