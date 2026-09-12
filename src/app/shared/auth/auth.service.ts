@@ -15,7 +15,7 @@ import { FIREBASE_AUTH } from '../firebase/firebase.tokens';
 import { User } from '../models';
 import { UserService } from '../user/user.service';
 
-/** Deutsche, feldnahe Fehlermeldungen je Firebase-Auth-Fehlercode (DoD: keine Alerts). */
+/** Deutsche Fehlermeldungen fuer bekannte Firebase-Auth-Fehler. */
 const AUTH_ERROR_MESSAGES: Record<string, string | undefined> = {
   'auth/invalid-email': 'Diese E-Mail-Adresse ist leider ungültig.',
   'auth/invalid-credential': 'E-Mail oder Passwort ist falsch.',
@@ -37,51 +37,56 @@ const AUTH_ERROR_MESSAGES: Record<string, string | undefined> = {
 
 const FALLBACK_MESSAGE = 'Anmeldung fehlgeschlagen. Bitte versuche es erneut.';
 
+/** Verwaltet Registrierung, Login und Passwort-Reset ueber Firebase Auth. */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly auth = inject(FIREBASE_AUTH);
   private readonly userService = inject(UserService);
 
+  /** Meldet einen bestehenden User mit E-Mail und Passwort an. */
   async loginWithEmail(email: string, password: string): Promise<void> {
     await signInWithEmailAndPassword(this.auth, email, password);
   }
 
+  /** Meldet einen Google-User an und stellt dessen Firestore-Profil sicher. */
   async loginWithGoogle(): Promise<void> {
     const { user } = await signInWithPopup(this.auth, new GoogleAuthProvider());
-    await this.userService.ensureProfile(this.toProfile(user, false));
+    await this.userService.ensureProfile(this.toProfile(user));
   }
 
+  /** Meldet einen anonymen Gast an, ohne ein User-Profil anzulegen. */
   async loginAsGuest(): Promise<void> {
-    const { user } = await signInAnonymously(this.auth);
-    await this.userService.ensureProfile(this.toProfile(user, true));
+    await signInAnonymously(this.auth);
   }
 
-  /** Baut ein Default-Profil aus dem Firebase-Auth-User (Google-Daten bzw. Gast). */
-  private toProfile(user: FirebaseUser, guest: boolean): User {
+  /** Erstellt aus einem Firebase-User ein normales Firestore-Profil. */
+  private toProfile(user: FirebaseUser): User {
     return {
       id: user.uid,
-      name: guest ? 'Gast' : (user.displayName ?? 'Nutzer'),
-      email: guest ? '' : (user.email ?? ''),
-      avatarUrl: guest
-        ? 'img/avatar/profile_blank.svg'
-        : (user.photoURL ?? 'img/avatar/avatar01.svg'),
+      name: user.displayName ?? 'Nutzer',
+      email: user.email ?? '',
+      avatarUrl: user.photoURL ?? 'img/avatar/avatar01.svg',
       onlineStatus: 'online',
     };
   }
 
-  /** Legt den Auth-Account an, setzt den Anzeigenamen und liefert die neue User-ID. */
-  async registerWithEmail(name: string, email: string, password: string): Promise<string> {
-    const credential = await createUserWithEmailAndPassword(this.auth, email, password);
+  /** Erstellt einen Account und liefert dessen neue User-ID zurueck. */
+  async registerWithEmail(
+    name: string,
+    email: string,
+    password: string,
+  ): Promise<string> {
+    const credential = await createUserWithEmailAndPassword(
+      this.auth,
+      email,
+      password,
+    );
+
     await updateProfile(credential.user, { displayName: name });
     return credential.user.uid;
   }
 
-  /**
-   * Schickt eine Passwort-Reset-Mail. `auth/user-not-found` wird bewusst
-   * geschluckt (Schutz gegen E-Mail-Enumeration) – der Aufrufer zeigt immer
-   * dieselbe neutrale Erfolgsmeldung. Wohin der Link zeigt, wird über die
-   * Action-URL in der Firebase Console gesteuert (Auth -> Templates), nicht hier.
-   */
+  /** Verschickt eine Passwort-Reset-Mail ohne User-Enumeration. */
   async sendResetEmail(email: string): Promise<void> {
     try {
       await sendPasswordResetEmail(this.auth, email);
@@ -91,7 +96,7 @@ export class AuthService {
     }
   }
 
-  /** Setzt das Passwort per oobCode aus der Reset-Mail. Wirft `Error` mit fertiger Meldung. */
+  /** Setzt das Passwort ueber den Code aus der Reset-Mail neu. */
   async confirmReset(oobCode: string, newPassword: string): Promise<void> {
     try {
       await confirmPasswordReset(this.auth, oobCode, newPassword);
@@ -100,6 +105,7 @@ export class AuthService {
     }
   }
 
+  /** Uebersetzt Firebase-Fehler in eine passende Benutzer-Meldung. */
   toMessage(error: unknown): string {
     const code = error instanceof FirebaseError ? error.code : '';
     return AUTH_ERROR_MESSAGES[code] ?? FALLBACK_MESSAGE;

@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
 import { ChannelAddMembers } from '../../channel/channel-add-members/channel-add-members';
 import { ChannelCreate } from '../../channel/channel-create/channel-create';
 import { ChannelInfo } from '../../channel/channel-info/channel-info';
@@ -12,12 +12,7 @@ import { UserService } from '../../../shared/user/user.service';
 
 type SidebarDialog = 'create' | 'add-members' | 'channel-info' | 'profile' | null;
 
-/**
- * Grobes Workspace-Sidebar-Grundgeruest (Spalte 1). Channel erstellen,
- * Channel-Info und Profil-Card sind echt verdrahtet (Komponenten existieren
- * ja schon). Die eigentliche Chat-Ansicht/-Auswahl ist Michaels Teil und
- * kommt spaeter dazu.
- */
+/** Verwaltet Channels, Direktkontakte und Dialoge der Workspace-Sidebar. */
 @Component({
   selector: 'app-sidebar',
   imports: [Icon, ChannelCreate, ChannelAddMembers, ChannelInfo, ProfileCard],
@@ -31,7 +26,9 @@ export class Sidebar {
 
   protected readonly channels = signal<Channel[]>([]);
   protected readonly users = signal<User[]>([]);
+
   private readonly currentUid = signal<string | null>(null);
+  private readonly currentIsGuest = signal(false);
 
   protected readonly channelsExpanded = signal(true);
   protected readonly dmsExpanded = signal(true);
@@ -45,42 +42,58 @@ export class Sidebar {
 
   constructor() {
     void this.loadChannels();
-    this.resolveCurrentUid();
+    this.resolveCurrentUser();
   }
 
+  /** Laedt alle vorhandenen Channels fuer die Sidebar. */
   private async loadChannels(): Promise<void> {
     this.channels.set(await this.channelService.listChannels());
   }
 
-  private resolveCurrentUid(): void {
-    if (this.auth.currentUser) {
-      this.currentUid.set(this.auth.currentUser.uid);
-      void this.loadUsers();
+  /** Ermittelt den aktuellen Firebase-User und dessen Gaststatus. */
+  private resolveCurrentUser(): void {
+    const user = this.auth.currentUser;
+
+    if (user) {
+      this.setCurrentUser(user);
       return;
     }
-    const unsubscribe = onAuthStateChanged(this.auth, (user) => {
+
+    const unsubscribe = onAuthStateChanged(this.auth, (currentUser) => {
       unsubscribe();
-      this.currentUid.set(user?.uid ?? null);
-      void this.loadUsers();
+      this.setCurrentUser(currentUser);
     });
   }
 
-  private async loadUsers(): Promise<void> {
-    const all = await this.userService.listUsers();
-    this.users.set(all.filter((user) => user.id !== this.currentUid()));
+  /** Speichert UID und Gaststatus und laedt die sichtbaren Kontakte. */
+  private setCurrentUser(user: FirebaseUser | null): void {
+    this.currentUid.set(user?.uid ?? null);
+    this.currentIsGuest.set(user?.isAnonymous ?? false);
+    void this.loadUsers();
   }
 
+  /** Laedt nur die fuer den aktuellen Login sichtbaren User. */
+  private async loadUsers(): Promise<void> {
+    const users = await this.userService.listVisibleUsers(
+      this.currentIsGuest(),
+    );
+
+    this.users.set(
+      users.filter((user) => user.id !== this.currentUid()),
+    );
+  }
+
+  /** Oeffnet oder schliesst die Channel-Liste. */
   protected toggleChannels(): void {
     this.channelsExpanded.update((open) => !open);
   }
 
+  /** Oeffnet oder schliesst die Direktnachrichten-Liste. */
   protected toggleDms(): void {
     this.dmsExpanded.update((open) => !open);
   }
 
-  // TODO: sobald die echte Chat-Ansicht steht (Michaels Teil), hier
-  // zusaetzlich den ausgewaehlten Channel an main-chat weiterreichen. Bis
-  // dahin oeffnet ein Klick den Verwaltungs-Dialog (channel-info).
+  /** Waehlt einen Channel und oeffnet dessen Verwaltungsdialog. */
   protected selectChannel(channel: Channel): void {
     this.selectedChannelId.set(channel.id);
     this.selectedUserId.set(null);
@@ -88,8 +101,7 @@ export class Sidebar {
     this.activeDialog.set('channel-info');
   }
 
-  // TODO: sobald ein echtes DM-Modul existiert (Michaels Teil), hier
-  // zusaetzlich die DM oeffnen. Bis dahin zeigt ein Klick das Profil.
+  /** Waehlt einen User und oeffnet dessen Profil. */
   protected selectUser(user: User): void {
     this.selectedUserId.set(user.id);
     this.selectedChannelId.set(null);
@@ -97,31 +109,37 @@ export class Sidebar {
     this.activeDialog.set('profile');
   }
 
+  /** Oeffnet den Dialog zum Erstellen eines Channels. */
   protected onAddChannel(): void {
     this.activeDialog.set('create');
   }
 
+  /** Oeffnet nach der Erstellung die Mitglieder-Auswahl. */
   protected onChannelCreated(channelId: string): void {
     this.dialogChannelId.set(channelId);
     this.activeDialog.set('add-members');
   }
 
+  /** Schliesst den Channel-Erstellen-Dialog. */
   protected onCreateClosed(): void {
     this.activeDialog.set(null);
   }
 
+  /** Schliesst die Mitglieder-Auswahl und aktualisiert Channels. */
   protected onAddMembersClosed(): void {
     this.activeDialog.set(null);
     this.dialogChannelId.set(null);
     void this.loadChannels();
   }
 
+  /** Schliesst die Channel-Info und aktualisiert Channels. */
   protected onChannelInfoClosed(): void {
     this.activeDialog.set(null);
     this.dialogChannelId.set(null);
     void this.loadChannels();
   }
 
+  /** Schliesst das geoeffnete User-Profil. */
   protected onProfileClosed(): void {
     this.activeDialog.set(null);
     this.dialogUserId.set(null);

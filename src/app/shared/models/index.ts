@@ -11,6 +11,7 @@ export interface User {
   email: string;
   avatarUrl: string;
   onlineStatus: OnlineStatus;
+  isDemo?: boolean;
 }
 
 export interface Channel {
