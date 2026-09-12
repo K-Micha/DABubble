@@ -148,6 +148,19 @@
   }
 }
 
+.main-chat__attachment-preview {
+  @include mx.flex(row, flex-start, center);
+  gap: fct.px-to-rem(8px);
+}
+
+.remove {
+  background-color: unset;
+
+  &:hover {
+    color: fct.color(purple-1) !important;
+  }
+}
+
 .main-chat__send {
   flex: 0 0 auto;
   width: 36px;
