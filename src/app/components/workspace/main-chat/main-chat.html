@@ -8,45 +8,89 @@
     <div class="main-chat__members">
       <div class="main-chat__avatars">
         @for (avatar of memberAvatars; track avatar) {
-        <img [src]="avatar" alt="" />
+          <img [src]="avatar" alt="" />
         }
       </div>
-      <button type="button" class="main-chat__add" (click)="onAddMembers()" aria-label="Mitglieder hinzufügen">
+
+      <button
+        type="button"
+        class="main-chat__add"
+        (click)="onAddMembers()"
+        aria-label="Mitglieder hinzufügen"
+      >
         <app-icon name="plus" />
       </button>
     </div>
   </header>
-  
 
   <div class="main-chat__body">
-    <p>Nachrichten erscheinen hier</p>
+    @for (message of messages; track $index) {
+      <div class="main-chat__message">
+        @if (message.text) {
+          <p>{{ message.text }}</p>
+        }
+
+        @if (message.attachment) {
+          <div class="main-chat__message-attachment">
+            <app-icon name="attachment" />
+            <span>{{ message.attachment }}</span>
+          </div>
+        }
+      </div>
+    }
   </div>
 
   <div class="main-chat__input">
-        @if (selectedFile) {
-    <div class="main-chat__attachment-preview">
-      <app-icon name="attachment" />
+    @if (selectedFile) {
+      <div class="main-chat__attachment-preview">
+        <app-icon name="attachment" />
 
-      <span class="main-chat__attachment-name">
-        {{ selectedFile.name }}
-      </span>
+        <span class="main-chat__attachment-name">
+          {{ selectedFile.name }}
+        </span>
 
-      <button type="button" class="main-chat__add remove" aria-label="Datei entfernen" (click)="removeSelectedFile()">
-        <app-icon name="close" />
-      </button>
-    </div>
+        <button
+          type="button"
+          class="main-chat__add remove"
+          aria-label="Datei entfernen"
+          (click)="removeSelectedFile()"
+        >
+          <app-icon name="close" />
+        </button>
+      </div>
     }
 
-    <textarea class="main-chat__input-field" placeholder="Nachricht an #{{ channelName }}" rows="1"></textarea>
+    <textarea
+      class="main-chat__input-field"
+      placeholder="Nachricht an #{{ channelName }}"
+      rows="1"
+      [value]="messageText"
+      (input)="onMessageInput($event)"
+    ></textarea>
 
-    <input #fileInput type="file" hidden (change)="onFileSelected($event)" />
+    <input
+      #fileInput
+      type="file"
+      hidden
+      (change)="onFileSelected($event)"
+    />
 
     <div class="main-chat__input-row">
-      <button type="button" class="main-chat__input-icon" aria-label="Datei anhängen" (click)="fileInput.click()">
+      <button
+        type="button"
+        class="main-chat__input-icon"
+        aria-label="Datei anhängen"
+        (click)="fileInput.click()"
+      >
         <app-icon name="attachment" />
       </button>
 
-      <button type="button" class="main-chat__send" aria-label="Senden">
+      <button
+        type="button"
+        class="main-chat__send"
+        aria-label="Senden"
+        (click)="onSend()"
+      >
         <app-icon name="send" />
       </button>
     </div>
