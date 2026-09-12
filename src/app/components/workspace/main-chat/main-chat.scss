@@ -266,3 +266,27 @@
     color: fct.color(purple-1);
   }
 }
+
+.main-chat__message--incoming {
+  justify-content: flex-start;
+}
+
+.main-chat__message--outgoing {
+  justify-content: flex-end;
+}
+
+.main-chat__message--incoming .main-chat__message-text {
+  color: fct.color(black);
+}
+
+.main-chat__message--outgoing .main-chat__message-text {
+  color: fct.color(white);
+}
+
+.main-chat__message--incoming .main-chat__message-bubble {
+  background: fct.color(background);
+}
+
+.main-chat__message--outgoing .main-chat__message-bubble {
+  background: fct.color(purple-2);
+}

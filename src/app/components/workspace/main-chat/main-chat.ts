@@ -36,6 +36,7 @@ export class MainChat implements OnInit {
   protected messageText = '';
 
   protected readonly messages: {
+    senderId: string;
     text: string;
     attachmentPath: string | null;
     attachmentName: string | null;
@@ -44,6 +45,17 @@ export class MainChat implements OnInit {
   /** Initialisiert den aktuell angezeigten Channel. */
   async ngOnInit(): Promise<void> {
     await this.loadCurrentChannel();
+    this.addIncomingTestMessage();
+  }
+
+  /** Fuegt temporaer eine eingehende Testnachricht hinzu. */
+  private addIncomingTestMessage(): void {
+    this.messages.push({
+      senderId: 'demo-other-user',
+      text: 'Test eingehende Nachricht',
+      attachmentPath: null,
+      attachmentName: null,
+    });
   }
 
   /** Reagiert auf das Oeffnen der Mitgliederverwaltung. */
@@ -142,19 +154,26 @@ export class MainChat implements OnInit {
       attachment.name ?? undefined,
     );
 
-    this.addLocalMessage(text, attachment);
+    this.addLocalMessage(text, senderId, attachment);
   }
 
   /** Fuegt eine gesendete Nachricht der lokalen Nachrichtenliste hinzu. */
   private addLocalMessage(
     text: string,
+    senderId: string,
     attachment: AttachmentData,
   ): void {
     this.messages.push({
+      senderId,
       text,
       attachmentPath: attachment.path,
       attachmentName: attachment.name,
     });
+  }
+
+  /** Prueft, ob die Nachricht vom aktuell eingeloggten User stammt. */
+  protected isOwnMessage(senderId: string): boolean {
+    return this.auth.currentUser?.uid === senderId;
   }
 
   /** Laedt die ausgewaehlte Datei in den Supabase-Storage hoch. */

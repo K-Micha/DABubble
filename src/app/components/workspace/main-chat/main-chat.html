@@ -25,7 +25,11 @@
 
   <div class="main-chat__body">
     @for (message of messages; track $index) {
-      <div class="main-chat__message">
+      <div
+        class="main-chat__message"
+        [class.main-chat__message--outgoing]="isOwnMessage(message.senderId)"
+        [class.main-chat__message--incoming]="!isOwnMessage(message.senderId)"
+      >
         <div class="main-chat__message-bubble">
           @if (message.text) {
             <p class="main-chat__message-text">
@@ -39,7 +43,6 @@
               class="main-chat__message-attachment"
               (click)="openAttachment(message.attachmentPath)"
             >
-
               <span>
                 {{ message.attachmentName }}
               </span>
