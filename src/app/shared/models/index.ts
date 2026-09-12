@@ -22,6 +22,12 @@ export interface Channel {
   createdAt: number;
 }
 
+export interface DirectChat {
+  id: string;
+  memberIds: string[];
+  createdAt: number;
+}
+
 export interface Reaction {
   emoji: string;
   userId: string;
@@ -37,6 +43,8 @@ export interface Message {
   timestamp: number;
   reactions: Reaction[];
   threadId?: string;
+  attachmentPath?: string;
+  attachmentName?: string;
 }
 
 export interface Thread {

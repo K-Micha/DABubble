@@ -2,7 +2,7 @@
   <header class="main-chat__head">
     <div class="main-chat__head-title">
       <app-icon name="hash" />
-      <h1>{{ channelName }}</h1>
+      <h1>{{ channelName() }}</h1>
     </div>
 
     <div class="main-chat__members">
@@ -26,16 +26,26 @@
   <div class="main-chat__body">
     @for (message of messages; track $index) {
       <div class="main-chat__message">
-        @if (message.text) {
-          <p>{{ message.text }}</p>
-        }
+        <div class="main-chat__message-bubble">
+          @if (message.text) {
+            <p class="main-chat__message-text">
+              {{ message.text }}
+            </p>
+          }
 
-        @if (message.attachment) {
-          <div class="main-chat__message-attachment">
-            <app-icon name="attachment" />
-            <span>{{ message.attachment }}</span>
-          </div>
-        }
+          @if (message.attachmentPath && message.attachmentName) {
+            <button
+              type="button"
+              class="main-chat__message-attachment"
+              (click)="openAttachment(message.attachmentPath)"
+            >
+
+              <span>
+                {{ message.attachmentName }}
+              </span>
+            </button>
+          }
+        </div>
       </div>
     }
   </div>
@@ -62,7 +72,7 @@
 
     <textarea
       class="main-chat__input-field"
-      placeholder="Nachricht an #{{ channelName }}"
+      placeholder="Nachricht an #{{ channelName() }}"
       rows="1"
       [value]="messageText"
       (input)="onMessageInput($event)"
