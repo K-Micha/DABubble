@@ -1,10 +1,77 @@
+@use '../../../styles/functions' as fct;
+@use '../../../styles/mixins' as mx;
+
+:host {
+  display: block;
+  min-height: 99vh;
+}
+
+.imprint-page {
+  min-height: 99vh;
+  background: fct.color(background);
+}
+
 .imprint {
-  width: 100%;
+  @include mx.flex(row, center, center);
+  min-height: calc(99vh - 140px);
+}
 
+.imprint__container {
+  @include mx.flex(column, flex-start, stretch);
+  gap: 32px;
+  width: 676px;
+  padding: 48px 56px;
+  border-radius: 30px;
+  background: fct.color(white);
+}
 
-  &__container {
-    width: 100%;
-    max-width: 1200px;
-    margin-inline: auto;
+.imprint__back {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  @include mx.flex(row, center, center);
+}
+
+.imprint__back-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.imprint__title {
+  margin: 0;
+  @include mx.typo(nunito, 700);
+  font-size: 46px;
+  line-height: 120%;
+  color: fct.color(purple-1);
+}
+
+.imprint__content {
+  @include mx.flex(column, flex-start, stretch);
+  gap: 24px;
+
+  p {
+    margin: 0;
+    @include mx.typo(nunito, 400);
+    font-size: 20px;
+    color: fct.color(black);
+  }
+
+  h2 {
+    margin: 0;
+    @include mx.typo(nunito, 700);
+    font-size: 32px;
+    color: fct.color(purple-1);
+  }
+
+  a {
+    color: fct.color(purple-1);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }

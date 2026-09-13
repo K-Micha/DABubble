@@ -1,34 +1,38 @@
-<section class="imprint">
-  <div class="imprint__container">
-    <h1>Impressum</h1>
+<div class="imprint-page">
+  <app-header variant="auth-register" />
 
-    <p>
-      Michael Kühn<br />
-      Milos Dimitrijevic<br />
-      Marktplatz 16<br />
-      5204 Straßwalchen<br />
-      Österreich
-    </p>
+  <main class="imprint">
+    <section class="imprint__container">
+      <button type="button" class="imprint__back" aria-label="Zurück" (click)="goBack()">
+        <app-icon name="arrow-back" />
+      </button>
 
-    <h2>Kontakt</h2>
+      <h1 class="imprint__title">
+        Impressum
+      </h1>
 
-    <p>
-      Telefon: [Telefonnummer]<br />
-      E-Mail: micha.kuehn91@gmail.com
-    </p>
+      <div class="imprint__content">
+        <p>
+          Michael Kühn<br />
+          Marktplatz 16<br />
+          5204 Straßwalchen<br />
+          Österreich
+        </p>
 
-    <h2>Redaktionell verantwortlich</h2>
+        <p>
+          Milos Dimitrijevic<br />
+          [Adresse von Milos]
+        </p>
 
-    <p>
-      Michael Kühn<br />
-      Milos Dimitrijevic
-    </p>
+        <h2>Contact:</h2>
 
-    <p>
-      Quelle:
-      <a href="https://www.e-recht24.de/impressum-generator.html">
-        eRecht24 Impressum-Generator
-      </a>
-    </p>
-  </div>
-</section>
+        <p>
+          Email:
+          <a href="mailto:micha.kuehn91@gmail.com">
+            micha.kuehn91@gmail.com
+          </a>
+        </p>
+      </div>
+    </section>
+  </main>
+</div>

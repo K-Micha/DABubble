@@ -1,9 +1,88 @@
+@use '../../../styles/functions' as fct;
+@use '../../../styles/mixins' as mx;
+
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.privacy-page {
+  min-height: 100vh;
+  background: fct.color(background);
+}
+
 .privacy {
   width: 100%;
+  padding-bottom: 80px;
+  margin-top: 55px;
+}
 
-  &__container {
-    width: 100%;
-    max-width: 1200px;
-    margin-inline: auto;
+.privacy__container {
+  width: 1312px;
+  max-width: calc(100% - 64px);
+  margin-inline: auto;
+  @include mx.flex(column, flex-start, stretch);
+  gap: 24px;
+}
+
+.privacy__title {
+  margin: 0;
+  @include mx.typo(nunito, 700);
+  font-size: 46px;
+  line-height: 120%;
+  color: fct.color(purple-1);
+}
+
+.privacy__content {
+  @include mx.flex(column, flex-start, stretch);
+  gap: 24px;
+}
+
+.privacy__content section {
+  @include mx.flex(column, flex-start, stretch);
+  gap: 10px;
+}
+
+.privacy__content h2,
+.privacy__content h3,
+.privacy__content h4,
+.privacy__content p,
+.privacy__content ul {
+  margin: 0;
+}
+
+.privacy__content h2,
+.privacy__content h3 {
+  @include mx.typo(nunito, 700);
+  font-size: 24px;
+  line-height: 100%;
+  color: fct.color(purple-1);
+}
+
+.privacy__content h4 {
+  @include mx.typo(nunito, 700);
+  font-size: 20px;
+  line-height: 100%;
+  color: fct.color(black);
+}
+
+.privacy__content p,
+.privacy__content li {
+  @include mx.typo(nunito, 400);
+  font-size: 20px;
+  line-height: 100%;
+  color: fct.color(black);
+}
+
+.privacy__content ul {
+  padding-left: 24px;
+}
+
+.privacy__content a {
+  color: fct.color(purple-1);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
   }
 }
