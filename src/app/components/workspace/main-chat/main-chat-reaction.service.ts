@@ -2,6 +2,7 @@ import { inject, Injectable, signal } from '@angular/core';
 import { Message, Reaction } from '../../../shared/models';
 import { FIREBASE_AUTH } from '../../../shared/firebase/firebase.tokens';
 import { MessageService } from '../../../shared/message/message';
+import { MAIN_CHAT_EMOJIS } from './main-chat-emojis';
 
 /** Zusammenfassung einer Reaction fuer die Anzeige. */
 export type ReactionGroup = {
@@ -18,16 +19,7 @@ export class MainChatReactionService {
 
   readonly activeReactionMessageId = signal<string | null>(null);
 
-  readonly reactionOptions = [
-    '👍',
-    '❤️',
-    '😂',
-    '🎉',
-    '🚀',
-    '✅',
-    'k',
-    'm',
-  ];
+  readonly reactionOptions = MAIN_CHAT_EMOJIS;
 
   /** Liefert sechs Reactions und optional einen Ueberlauf. */
   getReactionGroups(message: Message): ReactionGroup[] {
