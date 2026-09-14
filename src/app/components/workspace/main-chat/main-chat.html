@@ -27,7 +27,23 @@
   </header>
 
   <div class="main-chat__body">
-    @for (message of messages(); track message.id) {
+    @for (
+      message of messages();
+      track message.id;
+      let index = $index
+    ) {
+      @if (showDateSeparator(index)) {
+        <div class="main-chat__date-separator">
+          <span class="main-chat__date-line"></span>
+
+          <span class="main-chat__date-label">
+            {{ formatDateSeparator(message.timestamp) }}
+          </span>
+
+          <span class="main-chat__date-line"></span>
+        </div>
+      }
+
       <div
         class="main-chat__message"
         [class.main-chat__message--outgoing]="isOwnMessage(message.senderId)"
@@ -74,7 +90,9 @@
               track reaction.overflow ? 'overflow' : reaction.emoji
             ) {
               @if (reaction.overflow) {
-                <span class="main-chat__reaction main-chat__reaction--overflow">
+                <span
+                  class="main-chat__reaction main-chat__reaction--overflow"
+                >
                   +{{ reaction.count }}
                 </span>
               } @else {

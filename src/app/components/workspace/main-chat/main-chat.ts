@@ -127,6 +127,56 @@ export class MainChat implements OnInit, OnDestroy {
     );
   }
 
+  /** Prueft, ob vor einer Nachricht ein Datumstrenner angezeigt wird. */
+  protected showDateSeparator(index: number): boolean {
+    if (index === 0) return true;
+
+    const messages = this.messages();
+    const current = new Date(messages[index].timestamp);
+    const previous = new Date(messages[index - 1].timestamp);
+
+    return !this.isSameDay(current, previous);
+  }
+
+  /** Prueft, ob zwei Zeitpunkte auf denselben Kalendertag fallen. */
+  private isSameDay(first: Date, second: Date): boolean {
+    return first.getFullYear() === second.getFullYear()
+      && first.getMonth() === second.getMonth()
+      && first.getDate() === second.getDate();
+  }
+
+  /** Formatiert das Datum eines Nachrichtentrenners. */
+  protected formatDateSeparator(timestamp: number): string {
+    const date = new Date(timestamp);
+
+    if (this.isToday(date)) return 'Heute';
+    if (this.isYesterday(date)) return 'Gestern';
+
+    return this.formatFullDate(date);
+  }
+
+  /** Prueft, ob ein Datum heute ist. */
+  private isToday(date: Date): boolean {
+    return this.isSameDay(date, new Date());
+  }
+
+  /** Prueft, ob ein Datum gestern war. */
+  private isYesterday(date: Date): boolean {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    return this.isSameDay(date, yesterday);
+  }
+
+  /** Formatiert ein aelteres Datum mit Wochentag. */
+  private formatFullDate(date: Date): string {
+    return new Intl.DateTimeFormat('de-DE', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+    }).format(date);
+  }
+
   /** Reagiert auf das Oeffnen der Mitgliederverwaltung. */
   protected onAddMembers(): void {
     console.log('[main-chat] add members clicked');
