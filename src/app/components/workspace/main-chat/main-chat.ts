@@ -15,10 +15,8 @@ import {
   AttachmentData,
   MainChatUploadService,
 } from './main-chat-upload.service';
-import {
-  MainChatReactionService,
-  ReactionGroup,
-} from './main-chat-reaction.service';
+import { MainChatReactionService } from './main-chat-reaction.service';
+import type { ReactionGroup } from './main-chat-reaction.service';
 import { MainChatProfileService } from './main-chat-profile.service';
 
 /** Verwaltet die Nachrichtenansicht eines Channels. */
@@ -90,12 +88,12 @@ export class MainChat implements OnInit, OnDestroy {
     void this.profileService.loadSenderProfiles(messages);
   }
 
-  /** Liefert den Anzeigenamen eines Nachrichtenabsenders. */
+  /** Liefert den Anzeigenamen eines Absenders. */
   protected getSenderName(senderId: string): string {
     return this.profileService.getSenderName(senderId);
   }
 
-  /** Liefert das Avatar eines Nachrichtenabsenders. */
+  /** Liefert das Avatar eines Absenders. */
   protected getSenderAvatar(senderId: string): string {
     return this.profileService.getSenderAvatar(senderId);
   }
@@ -105,9 +103,26 @@ export class MainChat implements OnInit, OnDestroy {
     return this.profileService.formatMessageTime(timestamp);
   }
 
-  /** Liefert gruppierte Reactions einer Nachricht. */
-  protected getReactionGroups(message: Message): ReactionGroup[] {
+  /** Liefert die sichtbaren Reactions einer Nachricht. */
+  protected getReactionGroups(
+    message: Message,
+  ): ReactionGroup[] {
     return this.reactionService.getReactionGroups(message);
+  }
+
+  /** Liefert die Anzahl ausgeblendeter Reactions. */
+  protected getHiddenReactionCount(message: Message): number {
+    return this.reactionService.getHiddenReactionCount(message);
+  }
+
+  /** Prueft, ob die Reaction-Liste erweitert ist. */
+  protected isReactionsExpanded(messageId: string): boolean {
+    return this.reactionService.isExpanded(messageId);
+  }
+
+  /** Oeffnet oder reduziert die Reaction-Liste. */
+  protected toggleReactionList(messageId: string): void {
+    this.reactionService.toggleExpanded(messageId);
   }
 
   /** Oeffnet oder schliesst die Emoji-Auswahl. */
@@ -127,7 +142,7 @@ export class MainChat implements OnInit, OnDestroy {
     );
   }
 
-  /** Prueft, ob vor einer Nachricht ein Datumstrenner angezeigt wird. */
+  /** Prueft, ob ein Datumstrenner angezeigt wird. */
   protected showDateSeparator(index: number): boolean {
     if (index === 0) return true;
 
@@ -138,13 +153,6 @@ export class MainChat implements OnInit, OnDestroy {
     return !this.isSameDay(current, previous);
   }
 
-  /** Prueft, ob zwei Zeitpunkte auf denselben Kalendertag fallen. */
-  private isSameDay(first: Date, second: Date): boolean {
-    return first.getFullYear() === second.getFullYear()
-      && first.getMonth() === second.getMonth()
-      && first.getDate() === second.getDate();
-  }
-
   /** Formatiert das Datum eines Nachrichtentrenners. */
   protected formatDateSeparator(timestamp: number): string {
     const date = new Date(timestamp);
@@ -153,6 +161,13 @@ export class MainChat implements OnInit, OnDestroy {
     if (this.isYesterday(date)) return 'Gestern';
 
     return this.formatFullDate(date);
+  }
+
+  /** Prueft, ob zwei Zeitpunkte am selben Tag liegen. */
+  private isSameDay(first: Date, second: Date): boolean {
+    return first.getFullYear() === second.getFullYear()
+      && first.getMonth() === second.getMonth()
+      && first.getDate() === second.getDate();
   }
 
   /** Prueft, ob ein Datum heute ist. */
@@ -168,7 +183,7 @@ export class MainChat implements OnInit, OnDestroy {
     return this.isSameDay(date, yesterday);
   }
 
-  /** Formatiert ein aelteres Datum mit Wochentag. */
+  /** Formatiert ein aelteres Datum. */
   private formatFullDate(date: Date): string {
     return new Intl.DateTimeFormat('de-DE', {
       weekday: 'long',
@@ -182,7 +197,7 @@ export class MainChat implements OnInit, OnDestroy {
     console.log('[main-chat] add members clicked');
   }
 
-  /** Laedt den aktuell verwendeten Channel aus Firestore. */
+  /** Laedt den aktuell verwendeten Channel. */
   private async loadCurrentChannel(): Promise<void> {
     const channels = await this.channelService.listChannels();
     const channel = channels[0];
@@ -196,7 +211,7 @@ export class MainChat implements OnInit, OnDestroy {
     this.channelName.set(channel.name);
   }
 
-  /** Uebernimmt den aktuellen Inhalt des Nachrichtenfeldes. */
+  /** Uebernimmt den Inhalt des Nachrichtenfeldes. */
   protected onMessageInput(event: Event): void {
     const input = event.target as HTMLTextAreaElement;
     this.messageText = input.value;
@@ -213,7 +228,7 @@ export class MainChat implements OnInit, OnDestroy {
       this.uploadService.prepareSelectedFile(file);
   }
 
-  /** Sendet eine Textnachricht mit optionalem Dateianhang. */
+  /** Sendet eine Nachricht mit optionalem Anhang. */
   protected async onSend(): Promise<void> {
     const text = this.messageText.trim();
     const senderId = this.auth.currentUser?.uid;
@@ -259,7 +274,7 @@ export class MainChat implements OnInit, OnDestroy {
     return attachment;
   }
 
-  /** Speichert die Nachricht in Firestore. */
+  /** Speichert eine Nachricht in Firestore. */
   private async saveMessage(
     text: string,
     senderId: string,

@@ -8,7 +8,6 @@ import { MAIN_CHAT_EMOJIS } from './main-chat-emojis';
 export type ReactionGroup = {
   emoji: string;
   count: number;
-  overflow?: boolean;
 };
 
 /** Verwaltet Reactions innerhalb des Main-Chats. */
@@ -18,22 +17,58 @@ export class MainChatReactionService {
   private readonly messageService = inject(MessageService);
 
   readonly activeReactionMessageId = signal<string | null>(null);
+  readonly expandedReactionMessageIds = signal<Set<string>>(new Set());
 
   readonly reactionOptions = MAIN_CHAT_EMOJIS;
 
-  /** Liefert sechs Reactions und optional einen Ueberlauf. */
+  /** Liefert die aktuell sichtbaren Reactions einer Nachricht. */
   getReactionGroups(message: Message): ReactionGroup[] {
     const groups = this.createSortedReactionGroups(message);
+    const limit = this.getReactionLimit(message.id);
 
-    if (groups.length <= 6) return groups;
-
-    return [
-      ...groups.slice(0, 6),
-      this.createOverflowGroup(groups.length),
-    ];
+    return groups.slice(0, limit);
   }
 
-  /** Erstellt gruppierte und nach Anzahl sortierte Reactions. */
+  /** Liefert die Anzahl aktuell ausgeblendeter Reactions. */
+  getHiddenReactionCount(message: Message): number {
+    const groups = this.createSortedReactionGroups(message);
+    const limit = this.getReactionLimit(message.id);
+
+    return Math.max(groups.length - limit, 0);
+  }
+
+  /** Prueft, ob die Reaction-Liste erweitert ist. */
+  isExpanded(messageId: string): boolean {
+    return this.expandedReactionMessageIds().has(messageId);
+  }
+
+  /** Oeffnet oder reduziert die Reaction-Liste. */
+  toggleExpanded(messageId: string): void {
+    this.expandedReactionMessageIds.update(
+      (current) => this.toggleExpandedId(current, messageId),
+    );
+  }
+
+  /** Aktualisiert den Expand-Status einer Nachricht. */
+  private toggleExpandedId(
+    current: Set<string>,
+    messageId: string,
+  ): Set<string> {
+    const next = new Set(current);
+
+    next.has(messageId)
+      ? next.delete(messageId)
+      : next.add(messageId);
+
+    return next;
+  }
+
+  /** Liefert das aktuelle Reaction-Limit. */
+  private getReactionLimit(messageId: string): number {
+    return this.isExpanded(messageId) ? 20 : 6;
+  }
+
+  /** Erstellt gruppierte und sortierte Reactions. */
   private createSortedReactionGroups(
     message: Message,
   ): ReactionGroup[] {
@@ -42,15 +77,6 @@ export class MainChatReactionService {
     return [...counts]
       .map(([emoji, count]) => ({ emoji, count }))
       .sort((a, b) => b.count - a.count);
-  }
-
-  /** Erstellt den Hinweis fuer weitere Reaction-Typen. */
-  private createOverflowGroup(totalGroups: number): ReactionGroup {
-    return {
-      emoji: '',
-      count: totalGroups - 6,
-      overflow: true,
-    };
   }
 
   /** Zaehlt gleiche Reactions einer Nachricht. */
@@ -65,7 +91,7 @@ export class MainChatReactionService {
     return counts;
   }
 
-  /** Oeffnet oder schliesst die Emoji-Auswahl einer Nachricht. */
+  /** Oeffnet oder schliesst die Emoji-Auswahl. */
   toggleReactionPicker(messageId: string): void {
     const current = this.activeReactionMessageId();
 
@@ -74,7 +100,7 @@ export class MainChatReactionService {
     );
   }
 
-  /** Fuegt eine Reaction hinzu oder entfernt die eigene vorhandene. */
+  /** Fuegt eine Reaction hinzu oder entfernt sie. */
   async toggleReaction(
     message: Message,
     emoji: string,
@@ -90,12 +116,7 @@ export class MainChatReactionService {
       emoji,
     );
 
-    await this.updateReaction(
-      message,
-      reaction,
-      channelId,
-    );
-
+    await this.updateReaction(message, reaction, channelId);
     this.activeReactionMessageId.set(null);
   }
 
@@ -128,11 +149,7 @@ export class MainChatReactionService {
       return;
     }
 
-    await this.addReaction(
-      channelId,
-      message.id,
-      reaction,
-    );
+    await this.addReaction(channelId, message.id, reaction);
   }
 
   /** Prueft, ob der User dieselbe Reaction bereits gesetzt hat. */

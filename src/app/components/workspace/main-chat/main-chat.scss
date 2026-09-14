@@ -425,3 +425,37 @@
   font-size: 16px;
   color: fct.color(black);
 }
+
+.main-chat__reaction-toggle {
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid fct.color(light-purple);
+  border-radius: 16px;
+  background: fct.color(white);
+  cursor: pointer;
+  @include mx.typo(nunito, 400);
+  font-size: 16px;
+  color: fct.color(black);
+
+  &:hover {
+    background: fct.color(background);
+  }
+}
+
+.main-chat__reaction-overflow {
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid fct.color(light-purple);
+  border-radius: 16px;
+  background: fct.color(white);
+  @include mx.flex(row, center, center);
+  @include mx.typo(nunito, 400);
+  font-size: 16px;
+  color: fct.color(text-gray);
+}
+
+@media (max-width: 700px) {
+  .main-chat__reaction-toggle {
+    display: none;
+  }
+}

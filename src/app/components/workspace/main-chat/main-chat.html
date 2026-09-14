@@ -87,24 +87,52 @@
           <div class="main-chat__reactions">
             @for (
               reaction of getReactionGroups(message);
-              track reaction.overflow ? 'overflow' : reaction.emoji
+              track reaction.emoji
             ) {
-              @if (reaction.overflow) {
-                <span
-                  class="main-chat__reaction main-chat__reaction--overflow"
-                >
-                  +{{ reaction.count }}
-                </span>
-              } @else {
-                <button
-                  type="button"
-                  class="main-chat__reaction"
-                  (click)="toggleReaction(message, reaction.emoji)"
-                >
-                  <span>{{ reaction.emoji }}</span>
-                  <span>{{ reaction.count }}</span>
-                </button>
-              }
+              <button
+                type="button"
+                class="main-chat__reaction"
+                (click)="toggleReaction(message, reaction.emoji)"
+              >
+                <span>{{ reaction.emoji }}</span>
+                <span>{{ reaction.count }}</span>
+              </button>
+            }
+
+            @if (
+              !isReactionsExpanded(message.id)
+              && getHiddenReactionCount(message) > 0
+            ) {
+              <span class="main-chat__reaction-overflow">
+                +{{ getHiddenReactionCount(message) }}
+              </span>
+
+              <button
+                type="button"
+                class="main-chat__reaction-toggle"
+                (click)="toggleReactionList(message.id)"
+              >
+                weitere
+              </button>
+            }
+
+            @if (
+              isReactionsExpanded(message.id)
+              && getHiddenReactionCount(message) > 0
+            ) {
+              <span class="main-chat__reaction-overflow">
+                +{{ getHiddenReactionCount(message) }}
+              </span>
+            }
+
+            @if (isReactionsExpanded(message.id)) {
+              <button
+                type="button"
+                class="main-chat__reaction-toggle"
+                (click)="toggleReactionList(message.id)"
+              >
+                Weniger anzeigen
+              </button>
             }
 
             <div class="main-chat__reaction-menu">
