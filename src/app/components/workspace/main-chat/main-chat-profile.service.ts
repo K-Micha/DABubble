@@ -2,7 +2,7 @@ import { inject, Injectable, signal } from '@angular/core';
 import { Message, User } from '../../../shared/models';
 import { UserService } from '../../../shared/user/user.service';
 
-/** Verwaltet Absenderprofile und deren Darstellung im Main-Chat. */
+/** Verwaltet Absenderprofile und Profil-Overlays im Main-Chat. */
 @Injectable()
 export class MainChatProfileService {
   private readonly userService = inject(UserService);
@@ -10,12 +10,17 @@ export class MainChatProfileService {
   private readonly senderProfiles =
     signal<Record<string, User | null>>({});
 
+  readonly selectedProfileUserId =
+    signal<string | null>(null);
+
   /** Laedt noch unbekannte Absenderprofile einer Nachrichtenliste. */
   async loadSenderProfiles(messages: Message[]): Promise<void> {
     const senderIds = this.getUnknownSenderIds(messages);
 
     await Promise.all(
-      senderIds.map((senderId) => this.loadSenderProfile(senderId)),
+      senderIds.map(
+        (senderId) => this.loadSenderProfile(senderId),
+      ),
     );
   }
 
@@ -23,18 +28,36 @@ export class MainChatProfileService {
   private getUnknownSenderIds(messages: Message[]): string[] {
     const profiles = this.senderProfiles();
 
-    return [...new Set(messages.map((message) => message.senderId))]
-      .filter((senderId) => !(senderId in profiles));
+    return [...new Set(
+      messages.map((message) => message.senderId),
+    )].filter((senderId) => !(senderId in profiles));
   }
 
   /** Laedt ein einzelnes Absenderprofil aus Firestore. */
-  private async loadSenderProfile(senderId: string): Promise<void> {
+  private async loadSenderProfile(
+    senderId: string,
+  ): Promise<void> {
     const profile = await this.userService.getUser(senderId);
 
     this.senderProfiles.update((profiles) => ({
       ...profiles,
       [senderId]: profile,
     }));
+  }
+
+  /** Liefert ein User-Profil anhand seiner ID. */
+  async getUser(userId: string): Promise<User | null> {
+    return this.userService.getUser(userId);
+  }
+
+  /** Oeffnet das Profil eines Users. */
+  openProfile(userId: string): void {
+    this.selectedProfileUserId.set(userId);
+  }
+
+  /** Schliesst das aktuell geoeffnete Profil. */
+  closeProfile(): void {
+    this.selectedProfileUserId.set(null);
   }
 
   /** Liefert den Anzeigenamen eines Nachrichtenabsenders. */

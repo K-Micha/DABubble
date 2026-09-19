@@ -1,32 +1,17 @@
-import {
-  Component,
-  inject,
-  Input,
-  OnDestroy,
-  OnInit,
-  signal,
-} from '@angular/core';
-import { Unsubscribe } from 'firebase/firestore';
-import { Icon } from '../../../shared/icon/icon';
-import { ChannelService } from '../../../shared/channel/channel.service';
-import { MessageService } from '../../../shared/message/message';
+import { Component, inject, Input, OnInit } from '@angular/core';
 import { FIREBASE_AUTH } from '../../../shared/firebase/firebase.tokens';
-import {
-  Channel,
-  Message,
-  User,
-} from '../../../shared/models';
-import { UserService } from '../../../shared/user/user.service';
+import { Icon } from '../../../shared/icon/icon';
+import { MessageService } from '../../../shared/message/message';
+import { Channel, Message, User, } from '../../../shared/models';
 import { ProfileCard } from '../../profile/profile-card/profile-card';
-import {
-  AttachmentData,
-  MainChatUploadService,
-} from './main-chat-upload.service';
+import { MainChatDateService } from './main-chat-date.service';
+import { MainChatProfileService } from './main-chat-profile.service';
 import { MainChatReactionService } from './main-chat-reaction.service';
 import type { ReactionGroup } from './main-chat-reaction.service';
-import { MainChatProfileService } from './main-chat-profile.service';
+import { MainChatSessionService } from './main-chat-session.service';
+import { AttachmentData, MainChatUploadService, } from './main-chat-upload.service';
 
-/** Verwaltet Channel- und Direktnachrichten. */
+/** Verwaltet Darstellung und Eingaben des Main-Chats. */
 @Component({
   selector: 'app-main-chat',
   imports: [
@@ -34,32 +19,35 @@ import { MainChatProfileService } from './main-chat-profile.service';
     ProfileCard,
   ],
   providers: [
+    MainChatDateService,
     MainChatProfileService,
     MainChatReactionService,
+    MainChatSessionService,
     MainChatUploadService,
   ],
   templateUrl: './main-chat.html',
   styleUrl: './main-chat.scss',
 })
-export class MainChat implements OnInit, OnDestroy {
+export class MainChat implements OnInit {
   private readonly auth = inject(FIREBASE_AUTH);
-  private readonly channelService = inject(ChannelService);
   private readonly messageService = inject(MessageService);
+  private readonly dateService = inject(MainChatDateService);
   private readonly profileService = inject(MainChatProfileService);
   private readonly reactionService = inject(MainChatReactionService);
+  private readonly sessionService = inject(MainChatSessionService);
   private readonly uploadService = inject(MainChatUploadService);
-  private readonly userService = inject(UserService);
 
-  private unsubscribeMessages: Unsubscribe | null = null;
-  private inputChannel: Channel | null = null;
-  private inputUser: User | null = null;
+  protected readonly channelName =
+    this.sessionService.channelName;
 
-  protected readonly channelName = signal('');
-  protected readonly messages = signal<Message[]>([]);
-  protected readonly directUser = signal<User | null>(null);
+  protected readonly messages =
+    this.sessionService.messages;
+
+  protected readonly directUser =
+    this.sessionService.directUser;
 
   protected readonly selectedProfileUserId =
-    signal<string | null>(null);
+    this.profileService.selectedProfileUserId;
 
   protected readonly activeReactionMessageId =
     this.reactionService.activeReactionMessageId;
@@ -67,8 +55,6 @@ export class MainChat implements OnInit, OnDestroy {
   protected readonly reactionOptions =
     this.reactionService.reactionOptions;
 
-  protected channelId: string | null = null;
-  protected dmId: string | null = null;
   protected selectedFile: File | null = null;
   protected messageText = '';
 
@@ -81,124 +67,40 @@ export class MainChat implements OnInit, OnDestroy {
   /** Uebernimmt einen ausgewaehlten Channel. */
   @Input()
   set channel(channel: Channel | null) {
-    this.inputChannel = channel;
-
     if (!channel) return;
 
-    this.inputUser = null;
-    this.switchChannel(channel);
+    const switched =
+      this.sessionService.switchChannel(channel);
+
+    if (switched) this.resetComposer();
   }
 
   /** Uebernimmt einen ausgewaehlten Direktchat-User. */
   @Input()
   set user(user: User | null) {
-    this.inputUser = user;
-
     if (!user) return;
 
-    this.inputChannel = null;
-    void this.switchDirectChat(user);
+    void this.selectDirectUser(user);
   }
 
   /** Initialisiert beim Start den ersten Channel. */
   async ngOnInit(): Promise<void> {
-    if (this.inputChannel || this.inputUser) return;
+    if (this.sessionService.hasActiveChat()) return;
 
-    await this.loadInitialChannel();
+    await this.sessionService.loadInitialChannel();
   }
 
-  /** Beendet den aktiven Nachrichten-Listener. */
-  ngOnDestroy(): void {
-    this.stopMessageListener();
+  /** Wechselt auf einen ausgewaehlten Direktchat. */
+  private async selectDirectUser(user: User): Promise<void> {
+    const switched = await this.sessionService.switchDirectChat(user);
+
+    if (switched) this.resetComposer();
   }
 
-  /** Wechselt auf einen Channel. */
-  private switchChannel(channel: Channel): void {
-    if (this.channelId === channel.id && !this.dmId) return;
-
-    this.stopMessageListener();
-    this.resetChatState();
-
-    this.channelId = channel.id;
-    this.channelName.set(channel.name);
-
-    this.subscribeChannelMessages();
-  }
-
-  /** Wechselt auf einen Direktchat. */
-  private async switchDirectChat(user: User): Promise<void> {
-    const currentUid = this.auth.currentUser?.uid;
-
-    if (!currentUid) return;
-
-    this.stopMessageListener();
-    this.resetChatState();
-
-    this.directUser.set(user);
-    this.channelName.set(user.name);
-
-    this.dmId =
-      await this.messageService.getOrCreateDirectChat(
-        currentUid,
-        user.id,
-      );
-
-    this.subscribeDirectMessages();
-  }
-
-  /** Entfernt den Zustand des vorherigen Chats. */
-  private resetChatState(): void {
-    this.channelId = null;
-    this.dmId = null;
-    this.directUser.set(null);
-    this.selectedProfileUserId.set(null);
-    this.messages.set([]);
+  /** Leert den Nachrichtenentwurf beim Chatwechsel. */
+  private resetComposer(): void {
     this.messageText = '';
     this.selectedFile = null;
-  }
-
-  /** Laedt beim Start den ersten Channel. */
-  private async loadInitialChannel(): Promise<void> {
-    const channels = await this.channelService.listChannels();
-    const channel = channels[0];
-
-    if (!channel) return;
-
-    this.switchChannel(channel);
-  }
-
-  /** Beobachtet Nachrichten des aktuellen Channels. */
-  private subscribeChannelMessages(): void {
-    if (!this.channelId) return;
-
-    this.unsubscribeMessages =
-      this.messageService.subscribeChannelMessages(
-        this.channelId,
-        (messages) => this.handleMessages(messages),
-      );
-  }
-
-  /** Beobachtet Nachrichten des aktuellen Direktchats. */
-  private subscribeDirectMessages(): void {
-    if (!this.dmId) return;
-
-    this.unsubscribeMessages =
-      this.messageService.subscribeDirectMessages(
-        this.dmId,
-        (messages) => this.handleMessages(messages),
-      );
-  }
-
-  /** Beendet den bisherigen Firestore-Listener. */
-  private stopMessageListener(): void {
-    this.unsubscribeMessages?.();
-    this.unsubscribeMessages = null;
-  }
-
-  /** Aktualisiert Nachrichten und Absenderprofile. */
-  private handleMessages(messages: Message[]): void {
-    this.messages.set(messages);
-    void this.profileService.loadSenderProfiles(messages);
   }
 
   /** Liefert den Anzeigenamen eines Absenders. */
@@ -213,25 +115,22 @@ export class MainChat implements OnInit, OnDestroy {
 
   /** Oeffnet das Profil eines Nachrichten-Absenders. */
   protected openProfile(userId: string): void {
-    this.selectedProfileUserId.set(userId);
+    this.profileService.openProfile(userId);
   }
 
   /** Schliesst das aktuell geoeffnete Profil. */
   protected closeProfile(): void {
-    this.selectedProfileUserId.set(null);
+    this.profileService.closeProfile();
   }
 
   /** Oeffnet aus einem Profil den zugehoerigen Direktchat. */
   protected async openDirectChat(userId: string): Promise<void> {
-    const user = await this.userService.getUser(userId);
+    const user = await this.profileService.getUser(userId);
 
     if (!user) return;
 
     this.closeProfile();
-    this.inputChannel = null;
-    this.inputUser = user;
-
-    await this.switchDirectChat(user);
+    await this.selectDirectUser(user);
   }
 
   /** Formatiert den Zeitpunkt einer Nachricht. */
@@ -241,8 +140,7 @@ export class MainChat implements OnInit, OnDestroy {
 
   /** Liefert die sichtbaren Reactions. */
   protected getReactionGroups(
-    message: Message,
-  ): ReactionGroup[] {
+    message: Message,): ReactionGroup[] {
     return this.reactionService.getReactionGroups(message);
   }
 
@@ -269,70 +167,25 @@ export class MainChat implements OnInit, OnDestroy {
   /** Fuegt eine Reaction hinzu oder entfernt sie. */
   protected async toggleReaction(
     message: Message,
-    emoji: string,
-  ): Promise<void> {
+    emoji: string,): Promise<void> {
     await this.reactionService.toggleReaction(
       message,
       emoji,
-      this.channelId,
+      this.sessionService.channelId(),
     );
   }
 
   /** Prueft, ob ein Datumstrenner angezeigt wird. */
   protected showDateSeparator(index: number): boolean {
-    if (index === 0) return true;
-
-    const messages = this.messages();
-
-    const current =
-      new Date(messages[index].timestamp);
-
-    const previous =
-      new Date(messages[index - 1].timestamp);
-
-    return !this.isSameDay(current, previous);
+    return this.dateService.showDateSeparator(
+      this.messages(),
+      index,
+    );
   }
 
   /** Formatiert das Datum eines Nachrichtentrenners. */
   protected formatDateSeparator(timestamp: number): string {
-    const date = new Date(timestamp);
-
-    if (this.isToday(date)) return 'Heute';
-    if (this.isYesterday(date)) return 'Gestern';
-
-    return this.formatFullDate(date);
-  }
-
-  /** Prueft, ob zwei Zeitpunkte am selben Tag liegen. */
-  private isSameDay(first: Date, second: Date): boolean {
-    return first.getFullYear() === second.getFullYear()
-      && first.getMonth() === second.getMonth()
-      && first.getDate() === second.getDate();
-  }
-
-  /** Prueft, ob ein Datum heute ist. */
-  private isToday(date: Date): boolean {
-    return this.isSameDay(date, new Date());
-  }
-
-  /** Prueft, ob ein Datum gestern war. */
-  private isYesterday(date: Date): boolean {
-    const yesterday = new Date();
-
-    yesterday.setDate(
-      yesterday.getDate() - 1,
-    );
-
-    return this.isSameDay(date, yesterday);
-  }
-
-  /** Formatiert ein aelteres Datum. */
-  private formatFullDate(date: Date): string {
-    return new Intl.DateTimeFormat('de-DE', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-    }).format(date);
+    return this.dateService.formatDateSeparator(timestamp);
   }
 
   /** Reagiert auf die Mitgliederverwaltung. */
@@ -354,8 +207,7 @@ export class MainChat implements OnInit, OnDestroy {
 
     if (!file) return;
 
-    this.selectedFile =
-      this.uploadService.prepareSelectedFile(file);
+    this.selectedFile = this.uploadService.prepareSelectedFile(file);
   }
 
   /** Sendet eine Nachricht mit optionalem Anhang. */
@@ -365,29 +217,23 @@ export class MainChat implements OnInit, OnDestroy {
 
     if (!this.canSendMessage(text, senderId)) return;
 
-    const attachment =
-      await this.getAttachmentData();
+    const attachment = await this.getAttachmentData();
 
     if (!attachment || !senderId) return;
 
-    await this.saveMessage(
-      text,
-      senderId,
-      attachment,
-    );
-
+    await this.saveMessage(text, senderId, attachment);
     this.messageText = '';
   }
 
   /** Prueft die Voraussetzungen fuer den Versand. */
   private canSendMessage(
     text: string,
-    senderId: string | undefined,
-  ): boolean {
+    senderId: string | undefined,): boolean {
+
     if (!text && !this.selectedFile) return false;
     if (!senderId) return false;
 
-    return !!this.channelId || !!this.dmId;
+    return this.sessionService.hasActiveChat();
   }
 
   /** Erstellt die Anhangsdaten einer Nachricht. */
@@ -408,10 +254,12 @@ export class MainChat implements OnInit, OnDestroy {
   private async saveMessage(
     text: string,
     senderId: string,
-    attachment: AttachmentData,
-  ): Promise<void> {
-    if (this.channelId) {
+    attachment: AttachmentData,): Promise<void> {
+    const channelId = this.sessionService.channelId();
+
+    if (channelId) {
       await this.saveChannelMessage(
+        channelId,
         text,
         senderId,
         attachment,
@@ -429,14 +277,13 @@ export class MainChat implements OnInit, OnDestroy {
 
   /** Speichert eine Channel-Nachricht. */
   private async saveChannelMessage(
+    channelId: string,
     text: string,
     senderId: string,
-    attachment: AttachmentData,
-  ): Promise<void> {
-    if (!this.channelId) return;
+    attachment: AttachmentData,): Promise<void> {
 
     await this.messageService.sendChannelMessage(
-      this.channelId,
+      channelId,
       senderId,
       text,
       attachment.path ?? undefined,
@@ -448,12 +295,13 @@ export class MainChat implements OnInit, OnDestroy {
   private async saveDirectMessage(
     text: string,
     senderId: string,
-    attachment: AttachmentData,
-  ): Promise<void> {
-    if (!this.dmId) return;
+    attachment: AttachmentData,): Promise<void> {
+
+    const dmId = this.sessionService.dmId();
+    if (!dmId) return;
 
     await this.messageService.sendDirectMessage(
-      this.dmId,
+      dmId,
       senderId,
       text,
       attachment.path ?? undefined,
@@ -468,7 +316,7 @@ export class MainChat implements OnInit, OnDestroy {
 
   /** Prueft, ob aktuell ein Direktchat angezeigt wird. */
   protected isDirectChat(): boolean {
-    return this.dmId !== null;
+    return !!this.sessionService.dmId();
   }
 
   /** Liefert den Placeholder des Nachrichtenfeldes. */
@@ -482,8 +330,7 @@ export class MainChat implements OnInit, OnDestroy {
 
   /** Oeffnet einen privaten Nachrichtenanhang. */
   protected async openAttachment(
-    attachmentPath: string,
-  ): Promise<void> {
+    attachmentPath: string,): Promise<void> {
     await this.uploadService.openAttachment(
       attachmentPath,
     );
