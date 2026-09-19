@@ -1,9 +1,11 @@
 /**
- * ENTWURF Firestore-Datenmodell (Sprint 0, gemeinsam in Woche 1 final festlegen).
- * Quelle: CLAUDE.md. Vor Woche 2 mit Michael abstimmen und ggf. anpassen.
+ * ENTWURF Firestore-Datenmodell.
  */
 
-export type OnlineStatus = 'online' | 'away' | 'offline';
+export type OnlineStatus =
+  | 'online'
+  | 'away'
+  | 'offline';
 
 export interface User {
   id: string;
@@ -21,6 +23,7 @@ export interface Channel {
   memberIds: string[];
   createdBy: string;
   createdAt: number;
+  guestVisible?: boolean;
 }
 
 export interface DirectChat {

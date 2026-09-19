@@ -73,15 +73,17 @@ export class Sidebar {
     signal<string | null>(null);
 
   constructor() {
-    void this.loadChannels();
     this.resolveCurrentUser();
   }
 
-  /** Laedt alle vorhandenen Channels fuer die Sidebar. */
+  /** Laedt die fuer den aktuellen Login sichtbaren Channels. */
   private async loadChannels(): Promise<void> {
-    this.channels.set(
-      await this.channelService.listChannels(),
-    );
+    const channels =
+      await this.channelService.listVisibleChannels(
+        this.currentIsGuest(),
+      );
+
+    this.channels.set(channels);
   }
 
   /** Ermittelt den aktuellen Firebase-User und dessen Gaststatus. */
@@ -102,7 +104,7 @@ export class Sidebar {
     );
   }
 
-  /** Speichert UID und Gaststatus und laedt sichtbare Kontakte. */
+  /** Speichert UID und Gaststatus und laedt sichtbare Daten. */
   private setCurrentUser(
     user: FirebaseUser | null,
   ): void {
@@ -111,6 +113,7 @@ export class Sidebar {
       user?.isAnonymous ?? false,
     );
 
+    void this.loadChannels();
     void this.loadUsers();
   }
 
