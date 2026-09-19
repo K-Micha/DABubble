@@ -16,12 +16,14 @@ const PINNED_CHANNELS = [
   'Office-Team',
 ];
 
+const AUTHENTICATED_CHANNEL = 'Office-Team';
+
 /** Zugriff auf die Firestore-Collection `channels`. */
 @Injectable({ providedIn: 'root' })
 export class ChannelService {
   private readonly firestore = inject(FIRESTORE);
 
-  /** Legt einen neuen Channel an und liefert dessen ID. */
+  /** Legt einen neuen Channel an und traegt den Ersteller direkt als Mitglied ein. */
   async createChannel(
     name: string,
     description: string,
@@ -58,17 +60,37 @@ export class ChannelService {
     return this.sortChannels(channels);
   }
 
-  /** Liefert die fuer den aktuellen Login sichtbaren Channels. */
+  /** Liefert nur die fuer den aktuellen User sichtbaren Channels. */
   async listVisibleChannels(
+    currentUid: string | null,
     isGuest: boolean,
   ): Promise<Channel[]> {
     const channels = await this.listChannels();
 
-    if (!isGuest) return channels;
-
     return channels.filter(
-      (channel) => channel.guestVisible === true,
+      (channel) =>
+        this.isChannelVisible(
+          channel,
+          currentUid,
+          isGuest,
+        ),
     );
+  }
+
+  /** Prueft die Sichtbarkeit eines Channels fuer den aktuellen User. */
+  private isChannelVisible(
+    channel: Channel,
+    currentUid: string | null,
+    isGuest: boolean,
+  ): boolean {
+    if (channel.guestVisible === true) return true;
+    if (!currentUid || isGuest) return false;
+
+    if (channel.name === AUTHENTICATED_CHANNEL) {
+      return true;
+    }
+
+    return channel.memberIds.includes(currentUid);
   }
 
   /** Sortiert feste Channels vor alle normalen Channels. */

@@ -1,4 +1,11 @@
-import { Component, computed, HostListener, inject, output, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  HostListener,
+  inject,
+  output,
+  signal,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
   AbstractControl,
@@ -8,50 +15,74 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
-import { FIREBASE_AUTH } from '../../../shared/firebase/firebase.tokens';
+import {
+  ChannelService,
+} from '../../../shared/channel/channel.service';
+import {
+  FIREBASE_AUTH,
+} from '../../../shared/firebase/firebase.tokens';
 import { Icon } from '../../../shared/icon/icon';
-import { ChannelService } from '../../../shared/channel/channel.service';
 import { Spinner } from '../../../shared/spinner/spinner';
 
-function notBlank(control: AbstractControl<string>): ValidationErrors | null {
-  return control.value.trim().length === 0 ? { blank: true } : null;
+/** Verhindert einen Channel-Namen nur aus Leerzeichen. */
+function notBlank(
+  control: AbstractControl,
+): ValidationErrors | null {
+  const value = String(control.value ?? '');
+
+  return value.trim().length === 0
+    ? { blank: true }
+    : null;
 }
 
-/**
- * Modal-Dialog "Channel erstellen". Kein eigener Route-Pfad – wird von der
- * Sidebar (Michaels Bereich) per @if o.ae. eingeblendet. Meldet sich nur ueber
- * Outputs zurueck, damit der Parent das Schliessen/Navigieren uebernimmt.
- */
+/** Dialog zum Erstellen eines neuen Channels. */
 @Component({
   selector: 'app-channel-create',
-  imports: [ReactiveFormsModule, Icon, Spinner],
+  imports: [
+    ReactiveFormsModule,
+    Icon,
+    Spinner,
+  ],
   templateUrl: './channel-create.html',
   styleUrl: './channel-create.scss',
 })
 export class ChannelCreate {
   private readonly auth = inject(FIREBASE_AUTH);
-  private readonly channelService = inject(ChannelService);
+  private readonly channelService =
+    inject(ChannelService);
 
-  /** Dialog wurde geschlossen (X, Escape, Backdrop-Klick) ohne zu erstellen. */
   readonly closed = output<void>();
-  /** Channel wurde erfolgreich erstellt; traegt die neue Channel-ID. */
   readonly created = output<string>();
 
   protected readonly loading = signal(false);
-  protected readonly formError = signal<string | null>(null);
+
+  protected readonly formError =
+    signal<string | null>(null);
 
   protected readonly form = new FormGroup({
     name: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required, notBlank],
+      validators: [
+        Validators.required,
+        notBlank,
+      ],
     }),
-    description: new FormControl('', { nonNullable: true }),
+    description: new FormControl('', {
+      nonNullable: true,
+    }),
   });
 
-  private readonly status = toSignal(this.form.controls.name.statusChanges, {
-    initialValue: this.form.controls.name.status,
-  });
-  protected readonly formInvalid = computed(() => this.status() !== 'VALID');
+  private readonly status = toSignal(
+    this.form.controls.name.statusChanges,
+    {
+      initialValue:
+        this.form.controls.name.status,
+    },
+  );
+
+  protected readonly formInvalid = computed(
+    () => this.status() !== 'VALID',
+  );
 
   @HostListener('document:keydown.escape')
   protected onEscape(): void {
@@ -67,26 +98,57 @@ export class ChannelCreate {
   }
 
   protected onSubmit(): void {
-    if (this.loading() || this.formInvalid()) {
+    if (
+      this.loading()
+      || this.formInvalid()
+    ) {
       this.form.markAllAsTouched();
       return;
     }
+
     void this.runCreate();
   }
 
+  /** Erstellt den Channel fuer den aktuell angemeldeten User. */
   private async runCreate(): Promise<void> {
     this.loading.set(true);
     this.formError.set(null);
 
     try {
-      const { name, description } = this.form.getRawValue();
-      const uid = this.auth.currentUser?.uid ?? '';
-      const id = await this.channelService.createChannel(name.trim(), description.trim(), uid);
-      this.created.emit(id);
+      await this.createChannel();
     } catch {
-      this.formError.set('Channel konnte nicht erstellt werden. Bitte versuche es erneut.');
+      this.setCreateError();
     } finally {
       this.loading.set(false);
     }
+  }
+
+  /** Speichert den Channel und gibt dessen ID an die Sidebar weiter. */
+  private async createChannel(): Promise<void> {
+    const { name, description } =
+      this.form.getRawValue();
+
+    const uid =
+      this.auth.currentUser?.uid;
+
+    if (!uid) {
+      throw new Error('Missing user');
+    }
+
+    const id =
+      await this.channelService.createChannel(
+        name.trim(),
+        description.trim(),
+        uid,
+      );
+
+    this.created.emit(id);
+  }
+
+  /** Zeigt den Fehler beim Erstellen des Channels an. */
+  private setCreateError(): void {
+    this.formError.set(
+      'Channel konnte nicht erstellt werden. Bitte versuche es erneut.',
+    );
   }
 }

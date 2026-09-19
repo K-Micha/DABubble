@@ -80,6 +80,7 @@ export class Sidebar {
   private async loadChannels(): Promise<void> {
     const channels =
       await this.channelService.listVisibleChannels(
+        this.currentUid(),
         this.currentIsGuest(),
       );
 
