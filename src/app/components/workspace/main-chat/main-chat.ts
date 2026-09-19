@@ -3,6 +3,7 @@ import { FIREBASE_AUTH } from '../../../shared/firebase/firebase.tokens';
 import { Icon } from '../../../shared/icon/icon';
 import { MessageService } from '../../../shared/message/message';
 import { Channel, Message, User, } from '../../../shared/models';
+import { ChannelInfo } from '../../channel/channel-info/channel-info';
 import { ProfileCard } from '../../profile/profile-card/profile-card';
 import { MainChatDateService } from './main-chat-date.service';
 import { MainChatProfileService } from './main-chat-profile.service';
@@ -17,6 +18,7 @@ import { AttachmentData, MainChatUploadService, } from './main-chat-upload.servi
   imports: [
     Icon,
     ProfileCard,
+    ChannelInfo,
   ],
   providers: [
     MainChatDateService,
@@ -48,6 +50,9 @@ export class MainChat implements OnInit {
 
   protected readonly selectedProfileUserId =
     this.profileService.selectedProfileUserId;
+
+  protected readonly selectedChannelInfoId =
+    this.profileService.selectedChannelInfoId;
 
   protected readonly activeReactionMessageId =
     this.reactionService.activeReactionMessageId;
@@ -101,6 +106,18 @@ export class MainChat implements OnInit {
   private resetComposer(): void {
     this.messageText = '';
     this.selectedFile = null;
+  }
+
+  /** Oeffnet die Channel-Informationen. */
+  protected openChannelInfo(): void {
+    this.profileService.openChannelInfo(
+      this.sessionService.channelId(),
+    );
+  }
+
+  /** Schliesst die Channel-Informationen. */
+  protected closeChannelInfo(): void {
+    this.profileService.closeChannelInfo();
   }
 
   /** Liefert den Anzeigenamen eines Absenders. */

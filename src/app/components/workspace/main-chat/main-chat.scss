@@ -19,7 +19,6 @@
   background: fct.color(white);
 }
 
-
 .main-chat__head {
   @include mx.flex(row, space-between, center);
   gap: 16px;
@@ -27,15 +26,9 @@
 
 .main-chat__head-title {
   @include mx.flex(row, flex-start, center);
-  gap: 12px;
   min-width: 0;
 
-  app-icon {
-    flex: 0 0 auto;
-    color: fct.color(black);
-  }
-
-  h1 {
+  >h1 {
     margin: 0;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -44,6 +37,52 @@
     font-size: 24px;
     color: fct.color(black);
   }
+}
+
+.main-chat__channel-trigger {
+  @include mx.transition();
+  @include mx.typo(nunito, 700);
+  @include mx.flex(row, flex-start, center);
+  
+  width: min(278px, 100%);
+  min-width: 0;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 100px;
+  background: transparent;
+  color: fct.color(black);
+  cursor: pointer;
+  gap: 10px;
+  font-size: 24px;
+
+  &:hover {
+    background: fct.color(background);
+    color: fct.color(purple-1);
+  }
+
+  app-icon {
+    flex: 0 0 auto;
+  }
+
+  h1 {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: left;
+    @include mx.typo(nunito, 700);
+    font-size: 24px;
+    color: inherit;
+  }
+}
+
+.main-chat__channel-chevron {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  fill: currentColor;
 }
 
 .main-chat__members {
@@ -100,7 +139,6 @@
   @include mx.flex(column, flex-start, stretch);
   gap: 20px;
   padding: 12px 0;
-
   scrollbar-width: none;
 
   &::-webkit-scrollbar {
@@ -129,6 +167,7 @@
   height: 48px;
   border-radius: 50%;
   object-fit: cover;
+  cursor: pointer;
 }
 
 .main-chat__message-content {
@@ -163,9 +202,7 @@
 }
 
 .main-chat__message-bubble {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
+  @include mx.flex(row, flex-start, center);
   gap: 8px;
   max-width: 100%;
   padding: 10px 14px;
@@ -192,8 +229,7 @@
 }
 
 .main-chat__message-attachment {
-  display: flex;
-  align-items: center;
+  @include mx.flex(row, flex-start, center);
   gap: 8px;
   margin: 0;
   padding: 0;
@@ -258,16 +294,13 @@
   z-index: 10;
   bottom: 38px;
   left: 0;
-
   width: min(320px, calc(100vw - 48px));
   max-height: min(240px, 40vh);
   overflow-y: auto;
   overflow-x: hidden;
-
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(34px, 1fr));
   gap: 4px;
-
   padding: 8px;
   border-radius: 20px;
   background: fct.color(white);
@@ -288,11 +321,6 @@
       background: fct.color(background);
     }
   }
-}
-
-.main-chat__message--outgoing .main-chat__reaction-picker {
-  right: 0;
-  left: auto;
 }
 
 .main-chat__message--outgoing .main-chat__reaction-picker {

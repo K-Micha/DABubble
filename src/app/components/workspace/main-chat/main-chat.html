@@ -1,11 +1,34 @@
 <section class="main-chat">
   <header class="main-chat__head">
     <div class="main-chat__head-title">
-      <app-icon name="hash" />
+      @if (isDirectChat()) {
+        <h1>
+          {{ channelName() }}
+        </h1>
+      } @else {
+        <button
+          type="button"
+          class="main-chat__channel-trigger"
+          aria-label="Channel bearbeiten"
+          (click)="openChannelInfo()"
+        >
+          <app-icon name="hash" />
 
-      <h1>
-        {{ channelName() }}
-      </h1>
+          <span class="main-chat__channel-name">
+            {{ channelName() }}
+          </span>
+
+          <svg
+            class="main-chat__channel-chevron"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              d="M7.41 8.59 L12 13.17 l4.59 -4.58 L18 10 l-6 6 l-6 -6 Z"
+            />
+          </svg>
+        </button>
+      }
     </div>
 
     <div class="main-chat__members">
@@ -253,6 +276,13 @@
       [userId]="userId"
       (closed)="closeProfile()"
       (messageClicked)="openDirectChat($event)"
+    />
+  }
+
+  @if (selectedChannelInfoId(); as channelId) {
+    <app-channel-info
+      [channelId]="channelId"
+      (closed)="closeChannelInfo()"
     />
   }
 </section>

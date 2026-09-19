@@ -13,6 +13,9 @@ export class MainChatProfileService {
   readonly selectedProfileUserId =
     signal<string | null>(null);
 
+  readonly selectedChannelInfoId =
+    signal<string | null>(null);
+
   /** Laedt noch unbekannte Absenderprofile einer Nachrichtenliste. */
   async loadSenderProfiles(messages: Message[]): Promise<void> {
     const senderIds = this.getUnknownSenderIds(messages);
@@ -58,6 +61,18 @@ export class MainChatProfileService {
   /** Schliesst das aktuell geoeffnete Profil. */
   closeProfile(): void {
     this.selectedProfileUserId.set(null);
+  }
+
+  /** Oeffnet die Channel-Informationen. */
+  openChannelInfo(channelId: string | null): void {
+    if (!channelId) return;
+
+    this.selectedChannelInfoId.set(channelId);
+  }
+
+  /** Schliesst die Channel-Informationen. */
+  closeChannelInfo(): void {
+    this.selectedChannelInfoId.set(null);
   }
 
   /** Liefert den Anzeigenamen eines Nachrichtenabsenders. */

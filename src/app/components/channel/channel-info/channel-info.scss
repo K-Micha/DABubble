@@ -22,7 +22,6 @@
   @include mx.flex(column, flex-start, stretch);
   gap: 20px;
   padding: 40px;
-  // Bewusst asymmetrisch (Figma): oben-links eckig, Rest rund.
   border-radius: 0 30px 30px 30px;
   background: fct.color(white);
   box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
@@ -50,7 +49,9 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     @include mx.typo(nunito, 700);
-    font-size: 24px;
+    font-size: 24px !important;
+    line-height: 100%;
+    letter-spacing: 0;
     color: fct.color(black);
   }
 }
@@ -78,7 +79,6 @@
   }
 }
 
-// --- Box-Pattern (Channel-Name / Beschreibung) ---
 .info-box {
   @include mx.flex(column, flex-start, stretch);
   gap: 12px;
@@ -210,7 +210,6 @@
   }
 }
 
-// Fehlertext-Slot: immer im DOM, nur visibility toggeln -> kein Layout-Sprung.
 .info-box__error {
   min-height: 19px;
   margin: 0;
@@ -242,7 +241,6 @@
   color: fct.color(purple-3);
 }
 
-// --- Button ---
 .dialog-actions {
   @include mx.flex(row, flex-end, center);
 }
