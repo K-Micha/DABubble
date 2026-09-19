@@ -1,19 +1,31 @@
-import { Component } from '@angular/core';
+import {
+  Component,
+  signal,
+} from '@angular/core';
 import { Header } from '../header/header';
-import { MainChat } from '../main-chat/main-chat';
 import { Sidebar } from '../sidebar/sidebar';
+import { MainChat } from '../main-chat/main-chat';
 import { Thread } from '../thread/thread';
+import { Channel } from '../../../shared/models';
 
-/**
- * Workspace-Shell-Grundgeruest (grob, Sprint 1): Header + 3-Spalten-Layout
- * (Sidebar/Main-Chat/Thread). Ersetzt den Sprint-0-Platzhalter, siehe TODO
- * in app.routes.ts. Struktur/Look, NICHT pixelgenau - Michael baut das
- * eigentliche Chat-Layout in main-chat/thread weiter aus.
- */
+/** Verbindet Header, Sidebar, Main-Chat und Thread im Workspace. */
 @Component({
   selector: 'app-chat',
-  imports: [Header, Sidebar, MainChat, Thread],
+  imports: [
+    Header,
+    Sidebar,
+    MainChat,
+    Thread,
+  ],
   templateUrl: './chat.html',
   styleUrl: './chat.scss',
 })
-export class Chat {}
+export class Chat {
+  protected readonly selectedChannel =
+    signal<Channel | null>(null);
+
+  /** Uebernimmt den in der Sidebar ausgewaehlten Channel. */
+  protected onChannelSelected(channel: Channel): void {
+    this.selectedChannel.set(channel);
+  }
+}

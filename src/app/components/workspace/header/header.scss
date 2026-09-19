@@ -76,7 +76,6 @@
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
   }
 
-  // --- App-Variante (Workspace) ---
   &__search {
     @include mx.flex(row, flex-start, center);
     flex: 1 1 auto;
@@ -115,24 +114,7 @@
     @include mx.flex(row, center, center);
     flex: 0 0 auto;
     gap: 12px;
-    border: none;
-    outline: none;
-    background: none;
     padding: 4px 8px 4px 16px;
-    border-radius: 100px;
-    cursor: pointer;
-    @include mx.transition();
-
-    &:hover {
-      background: fct.color(background);
-    }
-
-    app-icon {
-      flex: 0 0 auto;
-      width: 20px;
-      height: 20px;
-      color: fct.color(text-gray);
-    }
   }
 
   &__user-name {
@@ -166,6 +148,30 @@
     border: 2px solid fct.color(white);
     border-radius: 50%;
     background: fct.color(online);
+  }
+
+  &__user-menu-button {
+    flex: 0 0 auto;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: fct.color(text-gray);
+    cursor: pointer;
+
+    @include mx.flex(row, center, center);
+    @include mx.transition();
+
+    app-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    &:hover {
+      color: fct.color(purple-1);
+    }
   }
 
   &__avatar img {

@@ -1,6 +1,7 @@
 import {
   Component,
   inject,
+  Input,
   OnDestroy,
   OnInit,
   signal,
@@ -10,7 +11,7 @@ import { Icon } from '../../../shared/icon/icon';
 import { ChannelService } from '../../../shared/channel/channel.service';
 import { MessageService } from '../../../shared/message/message';
 import { FIREBASE_AUTH } from '../../../shared/firebase/firebase.tokens';
-import { Message } from '../../../shared/models';
+import { Channel, Message } from '../../../shared/models';
 import {
   AttachmentData,
   MainChatUploadService,
@@ -40,6 +41,7 @@ export class MainChat implements OnInit, OnDestroy {
   private readonly uploadService = inject(MainChatUploadService);
 
   private unsubscribeMessages: Unsubscribe | null = null;
+  private inputChannel: Channel | null = null;
 
   protected readonly channelName = signal('');
   protected readonly messages = signal<Message[]>([]);
@@ -60,15 +62,50 @@ export class MainChat implements OnInit, OnDestroy {
     'img/avatar/avatar03.svg',
   ];
 
-  /** Initialisiert den aktuell angezeigten Channel. */
+  /** Uebernimmt einen ausgewaehlten Channel aus dem Workspace. */
+  @Input()
+  set channel(channel: Channel | null) {
+    this.inputChannel = channel;
+
+    if (channel) {
+      this.switchChannel(channel);
+    }
+  }
+
+  /** Initialisiert den ersten Channel, solange noch keiner uebergeben wurde. */
   async ngOnInit(): Promise<void> {
-    await this.loadCurrentChannel();
-    this.subscribeToMessages();
+    if (this.inputChannel) return;
+
+    await this.loadInitialChannel();
   }
 
   /** Beendet den Firestore-Listener. */
   ngOnDestroy(): void {
-    this.unsubscribeMessages?.();
+    this.stopMessageListener();
+  }
+
+  /** Wechselt den aktiven Channel. */
+  private switchChannel(channel: Channel): void {
+    if (this.channelId === channel.id) return;
+
+    this.stopMessageListener();
+    this.channelId = channel.id;
+    this.channelName.set(channel.name);
+    this.messages.set([]);
+    this.subscribeToMessages();
+  }
+
+  /** Laedt beim Start den ersten vorhandenen Channel. */
+  private async loadInitialChannel(): Promise<void> {
+    const channels = await this.channelService.listChannels();
+    const channel = channels[0];
+
+    if (!channel) {
+      console.error('[main-chat] no channels found');
+      return;
+    }
+
+    this.switchChannel(channel);
   }
 
   /** Startet den Echtzeit-Listener fuer den aktuellen Channel. */
@@ -80,6 +117,12 @@ export class MainChat implements OnInit, OnDestroy {
         this.channelId,
         (messages) => this.handleMessages(messages),
       );
+  }
+
+  /** Beendet den aktuell laufenden Nachrichten-Listener. */
+  private stopMessageListener(): void {
+    this.unsubscribeMessages?.();
+    this.unsubscribeMessages = null;
   }
 
   /** Aktualisiert Nachrichten und Absenderprofile. */
@@ -195,20 +238,6 @@ export class MainChat implements OnInit, OnDestroy {
   /** Reagiert auf das Oeffnen der Mitgliederverwaltung. */
   protected onAddMembers(): void {
     console.log('[main-chat] add members clicked');
-  }
-
-  /** Laedt den aktuell verwendeten Channel. */
-  private async loadCurrentChannel(): Promise<void> {
-    const channels = await this.channelService.listChannels();
-    const channel = channels[0];
-
-    if (!channel) {
-      console.error('[main-chat] no channels found');
-      return;
-    }
-
-    this.channelId = channel.id;
-    this.channelName.set(channel.name);
   }
 
   /** Uebernimmt den Inhalt des Nachrichtenfeldes. */

@@ -2,8 +2,14 @@
   <app-header variant="app"></app-header>
 
   <div class="workspace__columns">
-    <app-sidebar></app-sidebar>
-    <app-main-chat></app-main-chat>
+    <app-sidebar
+      (channelSelected)="onChannelSelected($event)"
+    ></app-sidebar>
+
+    <app-main-chat
+      [channel]="selectedChannel()"
+    ></app-main-chat>
+
     <app-thread></app-thread>
   </div>
 </div>

@@ -46,8 +46,12 @@
 
       <div
         class="main-chat__message"
-        [class.main-chat__message--outgoing]="isOwnMessage(message.senderId)"
-        [class.main-chat__message--incoming]="!isOwnMessage(message.senderId)"
+        [class.main-chat__message--outgoing]="
+          isOwnMessage(message.senderId)
+        "
+        [class.main-chat__message--incoming]="
+          !isOwnMessage(message.senderId)
+        "
       >
         <img
           class="main-chat__message-avatar"
@@ -73,7 +77,10 @@
               </p>
             }
 
-            @if (message.attachmentPath && message.attachmentName) {
+            @if (
+              message.attachmentPath
+              && message.attachmentName
+            ) {
               <button
                 type="button"
                 class="main-chat__message-attachment"
@@ -92,7 +99,12 @@
               <button
                 type="button"
                 class="main-chat__reaction"
-                (click)="toggleReaction(message, reaction.emoji)"
+                (click)="
+                  toggleReaction(
+                    message,
+                    reaction.emoji
+                  )
+                "
               >
                 <span>{{ reaction.emoji }}</span>
                 <span>{{ reaction.count }}</span>
@@ -145,12 +157,23 @@
                 ☺
               </button>
 
-              @if (activeReactionMessageId() === message.id) {
+              @if (
+                activeReactionMessageId()
+                === message.id
+              ) {
                 <div class="main-chat__reaction-picker">
-                  @for (emoji of reactionOptions; track emoji) {
+                  @for (
+                    emoji of reactionOptions;
+                    track emoji
+                  ) {
                     <button
                       type="button"
-                      (click)="toggleReaction(message, emoji)"
+                      (click)="
+                        toggleReaction(
+                          message,
+                          emoji
+                        )
+                      "
                     >
                       {{ emoji }}
                     </button>
