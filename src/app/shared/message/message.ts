@@ -27,6 +27,7 @@ export class MessageService {
     userIdB: string,
   ): Promise<string> {
     const directChats = collection(this.firestore, 'directChats');
+
     const existingChat = await this.findDirectChat(
       directChats,
       userIdA,
@@ -35,7 +36,11 @@ export class MessageService {
 
     if (existingChat) return existingChat.id;
 
-    return this.createDirectChat(directChats, userIdA, userIdB);
+    return this.createDirectChat(
+      directChats,
+      userIdA,
+      userIdB,
+    );
   }
 
   /** Sucht einen bestehenden Direktchat zwischen zwei Usern. */
@@ -53,6 +58,7 @@ export class MessageService {
 
     return snapshot.docs.find((entry) => {
       const chat = entry.data() as DirectChat;
+
       return chat.memberIds.includes(userIdB);
     });
   }
@@ -64,6 +70,7 @@ export class MessageService {
     userIdB: string,
   ): Promise<string> {
     const ref = doc(directChats);
+
     const chat = this.createDirectChatData(
       ref.id,
       userIdA,
@@ -88,20 +95,50 @@ export class MessageService {
     };
   }
 
-  /** Beobachtet die Nachrichten eines Channels in Echtzeit. */
+  /** Beobachtet Channel-Nachrichten in Echtzeit. */
   subscribeChannelMessages(
     channelId: string,
     callback: (messages: Message[]) => void,
   ): Unsubscribe {
-    const messages = this.createChannelMessagesCollection(channelId);
-    const messageQuery = query(messages, orderBy('timestamp', 'asc'));
+    const messages =
+      this.createChannelMessagesCollection(channelId);
+
+    return this.subscribeMessages(
+      messages,
+      callback,
+    );
+  }
+
+  /** Beobachtet Direktnachrichten in Echtzeit. */
+  subscribeDirectMessages(
+    dmId: string,
+    callback: (messages: Message[]) => void,
+  ): Unsubscribe {
+    const messages =
+      this.createDirectMessagesCollection(dmId);
+
+    return this.subscribeMessages(
+      messages,
+      callback,
+    );
+  }
+
+  /** Beobachtet eine Nachrichten-Collection nach Zeit sortiert. */
+  private subscribeMessages(
+    messages: ReturnType<typeof collection>,
+    callback: (messages: Message[]) => void,
+  ): Unsubscribe {
+    const messageQuery = query(
+      messages,
+      orderBy('timestamp', 'asc'),
+    );
 
     return onSnapshot(messageQuery, (snapshot) => {
-      const result = snapshot.docs.map(
-        (entry) => entry.data() as Message,
+      callback(
+        snapshot.docs.map(
+          (entry) => entry.data() as Message,
+        ),
       );
-
-      callback(result);
     });
   }
 
@@ -115,6 +152,16 @@ export class MessageService {
     );
   }
 
+  /** Liefert die Nachrichten-Collection eines Direktchats. */
+  private createDirectMessagesCollection(dmId: string) {
+    return collection(
+      this.firestore,
+      'directChats',
+      dmId,
+      'messages',
+    );
+  }
+
   /** Speichert eine Nachricht innerhalb eines Channels. */
   async sendChannelMessage(
     channelId: string,
@@ -123,10 +170,43 @@ export class MessageService {
     attachmentPath?: string,
     attachmentName?: string,
   ): Promise<string> {
-    const ref = this.createChannelMessageRef(channelId);
+    const ref = doc(
+      this.createChannelMessagesCollection(channelId),
+    );
+
     const message = this.createChannelMessage(
       ref.id,
       channelId,
+      senderId,
+      text,
+    );
+
+    this.addAttachmentData(
+      message,
+      attachmentPath,
+      attachmentName,
+    );
+
+    await setDoc(ref, message);
+
+    return message.id;
+  }
+
+  /** Speichert eine Nachricht innerhalb eines Direktchats. */
+  async sendDirectMessage(
+    dmId: string,
+    senderId: string,
+    text: string,
+    attachmentPath?: string,
+    attachmentName?: string,
+  ): Promise<string> {
+    const ref = doc(
+      this.createDirectMessagesCollection(dmId),
+    );
+
+    const message = this.createDirectMessage(
+      ref.id,
+      dmId,
       senderId,
       text,
     );
@@ -148,7 +228,10 @@ export class MessageService {
     messageId: string,
     reaction: Reaction,
   ): Promise<void> {
-    const ref = this.createChannelMessageDoc(channelId, messageId);
+    const ref = this.createChannelMessageDoc(
+      channelId,
+      messageId,
+    );
 
     await updateDoc(ref, {
       reactions: arrayUnion(reaction),
@@ -161,14 +244,49 @@ export class MessageService {
     messageId: string,
     reaction: Reaction,
   ): Promise<void> {
-    const ref = this.createChannelMessageDoc(channelId, messageId);
+    const ref = this.createChannelMessageDoc(
+      channelId,
+      messageId,
+    );
 
     await updateDoc(ref, {
       reactions: arrayRemove(reaction),
     });
   }
 
-  /** Erstellt die Referenz zu einer vorhandenen Channel-Nachricht. */
+  /** Fuegt einer Direktnachricht eine Reaction hinzu. */
+  async addDirectReaction(
+    dmId: string,
+    messageId: string,
+    reaction: Reaction,
+  ): Promise<void> {
+    const ref = this.createDirectMessageDoc(
+      dmId,
+      messageId,
+    );
+
+    await updateDoc(ref, {
+      reactions: arrayUnion(reaction),
+    });
+  }
+
+  /** Entfernt eine Reaction von einer Direktnachricht. */
+  async removeDirectReaction(
+    dmId: string,
+    messageId: string,
+    reaction: Reaction,
+  ): Promise<void> {
+    const ref = this.createDirectMessageDoc(
+      dmId,
+      messageId,
+    );
+
+    await updateDoc(ref, {
+      reactions: arrayRemove(reaction),
+    });
+  }
+
+  /** Liefert eine vorhandene Channel-Nachricht. */
   private createChannelMessageDoc(
     channelId: string,
     messageId: string,
@@ -182,11 +300,18 @@ export class MessageService {
     );
   }
 
-  /** Erstellt eine neue Nachrichten-Referenz fuer einen Channel. */
-  private createChannelMessageRef(channelId: string) {
-    const messages = this.createChannelMessagesCollection(channelId);
-
-    return doc(messages);
+  /** Liefert eine vorhandene Direktnachricht. */
+  private createDirectMessageDoc(
+    dmId: string,
+    messageId: string,
+  ) {
+    return doc(
+      this.firestore,
+      'directChats',
+      dmId,
+      'messages',
+      messageId,
+    );
   }
 
   /** Erstellt das Grundobjekt einer Channel-Nachricht. */
@@ -204,45 +329,6 @@ export class MessageService {
       timestamp: Date.now(),
       reactions: [],
     };
-  }
-
-  /** Speichert eine Nachricht innerhalb eines Direktchats. */
-  async sendDirectMessage(
-    dmId: string,
-    senderId: string,
-    text: string,
-    attachmentPath?: string,
-    attachmentName?: string,
-  ): Promise<string> {
-    const ref = this.createDirectMessageRef(dmId);
-    const message = this.createDirectMessage(
-      ref.id,
-      dmId,
-      senderId,
-      text,
-    );
-
-    this.addAttachmentData(
-      message,
-      attachmentPath,
-      attachmentName,
-    );
-
-    await setDoc(ref, message);
-
-    return message.id;
-  }
-
-  /** Erstellt eine neue Nachrichten-Referenz fuer einen Direktchat. */
-  private createDirectMessageRef(dmId: string) {
-    const messages = collection(
-      this.firestore,
-      'directChats',
-      dmId,
-      'messages',
-    );
-
-    return doc(messages);
   }
 
   /** Erstellt das Grundobjekt einer Direktnachricht. */

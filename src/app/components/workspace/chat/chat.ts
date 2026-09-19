@@ -6,7 +6,10 @@ import { Header } from '../header/header';
 import { Sidebar } from '../sidebar/sidebar';
 import { MainChat } from '../main-chat/main-chat';
 import { Thread } from '../thread/thread';
-import { Channel } from '../../../shared/models';
+import {
+  Channel,
+  User,
+} from '../../../shared/models';
 
 /** Verbindet Header, Sidebar, Main-Chat und Thread im Workspace. */
 @Component({
@@ -24,8 +27,18 @@ export class Chat {
   protected readonly selectedChannel =
     signal<Channel | null>(null);
 
-  /** Uebernimmt den in der Sidebar ausgewaehlten Channel. */
+  protected readonly selectedUser =
+    signal<User | null>(null);
+
+  /** Uebernimmt den ausgewaehlten Channel. */
   protected onChannelSelected(channel: Channel): void {
+    this.selectedUser.set(null);
     this.selectedChannel.set(channel);
+  }
+
+  /** Uebernimmt den ausgewaehlten Direktchat-User. */
+  protected onUserSelected(user: User): void {
+    this.selectedChannel.set(null);
+    this.selectedUser.set(user);
   }
 }

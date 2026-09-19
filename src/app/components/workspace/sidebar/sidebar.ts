@@ -16,9 +16,6 @@ import {
   ChannelCreate,
 } from '../../channel/channel-create/channel-create';
 import {
-  ProfileCard,
-} from '../../profile/profile-card/profile-card';
-import {
   ChannelService,
 } from '../../../shared/channel/channel.service';
 import {
@@ -33,7 +30,6 @@ import {
 type SidebarDialog =
   | 'create'
   | 'add-members'
-  | 'profile'
   | null;
 
 /** Verwaltet Channels, Direktkontakte und Dialoge der Workspace-Sidebar. */
@@ -43,13 +39,13 @@ type SidebarDialog =
     Icon,
     ChannelCreate,
     ChannelAddMembers,
-    ProfileCard,
   ],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.scss',
 })
 export class Sidebar {
   @Output() channelSelected = new EventEmitter<Channel>();
+  @Output() userSelected = new EventEmitter<User>();
 
   private readonly auth = inject(FIREBASE_AUTH);
   private readonly channelService = inject(ChannelService);
@@ -74,9 +70,6 @@ export class Sidebar {
     signal<SidebarDialog>(null);
 
   protected readonly dialogChannelId =
-    signal<string | null>(null);
-
-  protected readonly dialogUserId =
     signal<string | null>(null);
 
   constructor() {
@@ -156,12 +149,11 @@ export class Sidebar {
     this.channelSelected.emit(channel);
   }
 
-  /** Waehlt einen User und oeffnet dessen Profil. */
+  /** Waehlt einen User und meldet den Direktchat-Wechsel nach aussen. */
   protected selectUser(user: User): void {
     this.selectedUserId.set(user.id);
     this.selectedChannelId.set(null);
-    this.dialogUserId.set(user.id);
-    this.activeDialog.set('profile');
+    this.userSelected.emit(user);
   }
 
   /** Oeffnet den Dialog zum Erstellen eines Channels. */
@@ -188,11 +180,5 @@ export class Sidebar {
     this.dialogChannelId.set(null);
 
     void this.loadChannels();
-  }
-
-  /** Schliesst das geoeffnete User-Profil. */
-  protected onProfileClosed(): void {
-    this.activeDialog.set(null);
-    this.dialogUserId.set(null);
   }
 }

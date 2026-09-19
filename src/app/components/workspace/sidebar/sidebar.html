@@ -120,13 +120,4 @@
       />
     }
   }
-
-  @case ('profile') {
-    @if (dialogUserId(); as id) {
-      <app-profile-card
-        [userId]="id"
-        (closed)="onProfileClosed()"
-      />
-    }
-  }
 }

@@ -57,6 +57,11 @@
           class="main-chat__message-avatar"
           [src]="getSenderAvatar(message.senderId)"
           [alt]="getSenderName(message.senderId)"
+          role="button"
+          tabindex="0"
+          (click)="openProfile(message.senderId)"
+          (keydown.enter)="openProfile(message.senderId)"
+          (keydown.space)="openProfile(message.senderId)"
         />
 
         <div class="main-chat__message-content">
@@ -209,7 +214,7 @@
 
     <textarea
       class="main-chat__input-field"
-      placeholder="Nachricht an #{{ channelName() }}"
+      [placeholder]="getMessagePlaceholder()"
       rows="1"
       [value]="messageText"
       (input)="onMessageInput($event)"
@@ -242,4 +247,12 @@
       </button>
     </div>
   </div>
+
+  @if (selectedProfileUserId(); as userId) {
+    <app-profile-card
+      [userId]="userId"
+      (closed)="closeProfile()"
+      (messageClicked)="openDirectChat($event)"
+    />
+  }
 </section>

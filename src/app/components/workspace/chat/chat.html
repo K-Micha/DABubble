@@ -4,10 +4,12 @@
   <div class="workspace__columns">
     <app-sidebar
       (channelSelected)="onChannelSelected($event)"
+      (userSelected)="onUserSelected($event)"
     ></app-sidebar>
 
     <app-main-chat
       [channel]="selectedChannel()"
+      [user]="selectedUser()"
     ></app-main-chat>
 
     <app-thread></app-thread>
