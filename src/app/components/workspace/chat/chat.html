@@ -7,10 +7,22 @@
       (userSelected)="onUserSelected($event)"
     ></app-sidebar>
 
-    <app-main-chat
-      [channel]="selectedChannel()"
-      [user]="selectedUser()"
-    ></app-main-chat>
+    <div class="workspace__main">
+      <app-main-chat
+        [channel]="selectedChannel()"
+        [user]="selectedUser()"
+        (click)="onMainChatClick($event)"
+      ></app-main-chat>
+
+      @if (addMembersOpen()) {
+        @if (selectedChannel(); as channel) {
+          <app-add-members
+            [channelId]="channel.id"
+            (closed)="closeAddMembers()"
+          />
+        }
+      }
+    </div>
 
     <app-thread></app-thread>
   </div>

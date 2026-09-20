@@ -1,1 +1,117 @@
-<p>add-members works!</p>
+<div
+  class="add-members-backdrop"
+  (click)="onClose()"
+>
+  <section
+    class="add-members"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="add-members__handle"></div>
+
+    <div class="add-members__head">
+      <header class="add-members__header">
+        <h2 class="add-members__title">
+          Leute hinzufügen
+        </h2>
+
+        <button
+          type="button"
+          class="add-members__close"
+          aria-label="Schließen"
+          (click)="onClose()"
+        >
+          <app-icon name="close" />
+        </button>
+      </header>
+
+      <div class="add-members__channel">
+        <span class="add-members__hash">#</span>
+
+        <span class="add-members__channel-name">
+          Entwicklerteam
+        </span>
+      </div>
+    </div>
+
+    <div class="add-members__search-wrapper">
+      <div
+        class="add-members__search"
+        [class.add-members__search--active]="inputFocused()"
+      >
+        @if (selectedUser(); as user) {
+          <div class="add-members__chip">
+            <img
+              class="add-members__chip-avatar"
+              [src]="user.avatarUrl"
+              alt=""
+            />
+
+            <span class="add-members__chip-name">
+              {{ user.name }}
+            </span>
+
+            <button
+              type="button"
+              class="add-members__chip-remove"
+              aria-label="Person entfernen"
+              (click)="removeUser()"
+            >
+              ×
+            </button>
+          </div>
+        } @else {
+          <input
+            type="text"
+            class="add-members__input"
+            placeholder="Name eingeben"
+            [value]="searchTerm()"
+            (input)="updateSearch($event)"
+            (focus)="onFocus()"
+          />
+        }
+      </div>
+
+      @if (filteredUsers().length > 0) {
+        <div class="add-members__results">
+          @for (user of filteredUsers(); track user.id) {
+            <button
+              type="button"
+              class="add-members__result"
+              (click)="selectUser(user)"
+            >
+              <div class="add-members__avatar-wrapper">
+                <img
+                  class="add-members__avatar"
+                  [src]="user.avatarUrl"
+                  alt=""
+                />
+
+                <span
+                  class="add-members__status"
+                  [class.add-members__status--online]="
+                    user.onlineStatus === 'online'
+                  "
+                ></span>
+              </div>
+
+              <span class="add-members__result-name">
+                {{ user.name }}
+              </span>
+            </button>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="add-members__actions">
+      <button
+        type="button"
+        class="add-members__submit"
+        [disabled]="!selectedUser()"
+        (click)="onSubmit()"
+      >
+        Hinzufügen
+      </button>
+    </div>
+  </section>
+</div>

@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import {
   arrayRemove,
+  arrayUnion,
   collection,
   doc,
   getDoc,
@@ -8,6 +9,7 @@ import {
   setDoc,
   updateDoc,
 } from 'firebase/firestore';
+
 import { FIRESTORE } from '../firebase/firebase.tokens';
 import { Channel } from '../models';
 
@@ -23,7 +25,7 @@ const AUTHENTICATED_CHANNEL = 'Office-Team';
 export class ChannelService {
   private readonly firestore = inject(FIRESTORE);
 
-  /** Legt einen neuen Channel an und traegt den Ersteller direkt als Mitglied ein. */
+  /** Legt einen neuen Channel an und trägt den Ersteller direkt als Mitglied ein. */
   async createChannel(
     name: string,
     description: string,
@@ -60,7 +62,7 @@ export class ChannelService {
     return this.sortChannels(channels);
   }
 
-  /** Liefert nur die fuer den aktuellen User sichtbaren Channels. */
+  /** Liefert nur die für den aktuellen User sichtbaren Channels. */
   async listVisibleChannels(
     currentUid: string | null,
     isGuest: boolean,
@@ -77,7 +79,7 @@ export class ChannelService {
     );
   }
 
-  /** Prueft die Sichtbarkeit eines Channels fuer den aktuellen User. */
+  /** Prüft die Sichtbarkeit eines Channels für den aktuellen User. */
   private isChannelVisible(
     channel: Channel,
     currentUid: string | null,
@@ -85,12 +87,16 @@ export class ChannelService {
   ): boolean {
     if (channel.guestVisible === true) return true;
     if (!currentUid || isGuest) return false;
+    if (channel.name === AUTHENTICATED_CHANNEL) return true;
 
-    if (channel.name === AUTHENTICATED_CHANNEL) {
-      return true;
-    }
+    return this.getMemberIds(channel).includes(currentUid);
+  }
 
-    return channel.memberIds.includes(currentUid);
+  /** Liefert die Mitgliederliste auch für ältere Channel-Dokumente sicher. */
+  private getMemberIds(channel: Channel): string[] {
+    return Array.isArray(channel.memberIds)
+      ? channel.memberIds
+      : [];
   }
 
   /** Sortiert feste Channels vor alle normalen Channels. */
@@ -112,15 +118,28 @@ export class ChannelService {
       : index;
   }
 
-  /** Ueberschreibt die Mitgliederliste eines bestehenden Channels. */
+  /** Überschreibt die Mitgliederliste eines bestehenden Channels. */
   async setMembers(
     channelId: string,
     memberIds: string[],
   ): Promise<void> {
-    const ref =
-      doc(this.firestore, 'channels', channelId);
+    await updateDoc(
+      doc(this.firestore, 'channels', channelId),
+      { memberIds },
+    );
+  }
 
-    await updateDoc(ref, { memberIds });
+  /** Fügt einen einzelnen User zur Mitgliederliste hinzu. */
+  async addMember(
+    channelId: string,
+    userId: string,
+  ): Promise<void> {
+    await updateDoc(
+      doc(this.firestore, 'channels', channelId),
+      {
+        memberIds: arrayUnion(userId),
+      },
+    );
   }
 
   /** Liefert ein einzelnes Channel-Dokument oder null. */
