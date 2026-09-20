@@ -19,7 +19,9 @@ export type IconName =
   | 'chevron-down'
   | 'plus'
   | 'attachment'
-  | 'reply';
+  | 'reply'
+  | 'sidebar-close'
+  | 'sidebar-open';
 
 /**
  * Inline-SVG-Icons (kein Asset-Request, per `color` einfärbbar via currentColor).

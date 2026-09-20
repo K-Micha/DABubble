@@ -4,6 +4,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { AddMembers } from '../../channel/add-members/add-members';
 import { ChannelService } from '../../../shared/channel/channel.service';
 import { FIREBASE_AUTH } from '../../../shared/firebase/firebase.tokens';
+import { Icon } from '../../../shared/icon/icon';
 import { Channel, Message, User } from '../../../shared/models';
 
 import { Header } from '../header/header';
@@ -14,7 +15,7 @@ import { Thread } from '../thread/thread';
 /** Verbindet Header, Sidebar, Main-Chat und Thread im Workspace. */
 @Component({
   selector: 'app-chat',
-  imports: [Header, Sidebar, MainChat, Thread, AddMembers],
+  imports: [Header, Sidebar, MainChat, Thread, AddMembers, Icon],
   templateUrl: './chat.html',
   styleUrl: './chat.scss',
 })

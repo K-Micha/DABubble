@@ -16,10 +16,9 @@
         [attr.aria-label]="sidebarOpen() ? 'Workspace-Menü schließen' : 'Workspace-Menü öffnen'"
         (click)="toggleSidebar()"
       >
-        <img
+        <app-icon
           class="workspace__sidebar-toggle-icon"
-          [src]="sidebarOpen() ? 'icons/sidebar-close.svg' : 'icons/sidebar-open.svg'"
-          alt=""
+          [name]="sidebarOpen() ? 'sidebar-close' : 'sidebar-open'"
         />
 
         <span class="workspace__sidebar-toggle-text">
