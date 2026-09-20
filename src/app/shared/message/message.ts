@@ -5,6 +5,7 @@ import {
   collection,
   doc,
   getDocs,
+  increment,
   onSnapshot,
   orderBy,
   query,
@@ -297,7 +298,23 @@ export class MessageService {
     this.addAttachmentData(reply, attachmentPath, attachmentName);
 
     await setDoc(ref, reply);
+    await this.incrementReplyCount(parentMessage);
+
     return reply.id;
+  }
+
+  /** Erhoeht den Antworten-Zaehler der Elternnachricht (fuer den "X Antworten"-Link). */
+  private async incrementReplyCount(parentMessage: Message): Promise<void> {
+    const ref = this.getParentMessageDoc(parentMessage);
+    await updateDoc(ref, { replyCount: increment(1) });
+  }
+
+  /** Liefert die Dokument-Referenz einer Channel- oder Direktnachricht. */
+  private getParentMessageDoc(message: Message) {
+    if (message.channelId) {
+      return this.createChannelMessageDoc(message.channelId, message.id);
+    }
+    return this.createDirectMessageDoc(message.dmId ?? '', message.id);
   }
 
   /** Erstellt das Grundobjekt einer Thread-Antwort. */

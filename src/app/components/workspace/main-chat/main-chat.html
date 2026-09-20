@@ -178,6 +178,12 @@
               }
             </div>
           </div>
+
+          @if (message.replyCount && message.replyCount > 0) {
+            <button type="button" class="main-chat__thread-link" (click)="onReply(message)">
+              {{ message.replyCount }} {{ message.replyCount === 1 ? 'Antwort' : 'Antworten' }}
+            </button>
+          }
         </div>
       </div>
     }

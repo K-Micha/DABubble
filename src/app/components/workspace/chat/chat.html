@@ -43,6 +43,8 @@
       }
     </div>
 
-    <app-thread [message]="activeThreadMessage()" (closed)="onThreadClosed()"></app-thread>
+    @if (activeThreadMessage(); as message) {
+      <app-thread [message]="message" (closed)="onThreadClosed()"></app-thread>
+    }
   </div>
 </div>

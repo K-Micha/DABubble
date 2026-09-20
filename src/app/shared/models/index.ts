@@ -2,10 +2,7 @@
  * ENTWURF Firestore-Datenmodell.
  */
 
-export type OnlineStatus =
-  | 'online'
-  | 'away'
-  | 'offline';
+export type OnlineStatus = 'online' | 'away' | 'offline';
 
 export interface User {
   id: string;
@@ -49,6 +46,8 @@ export interface Message {
   threadId?: string;
   attachmentPath?: string;
   attachmentName?: string;
+  /** Anzahl Thread-Antworten (denormalisierter Zaehler fuer den "X Antworten"-Link). */
+  replyCount?: number;
 }
 
 export interface Thread {
