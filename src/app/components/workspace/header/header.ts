@@ -1,36 +1,19 @@
-import {
-  Component,
-  Input,
-  OnInit,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, Input, OnInit, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import {
-  onAuthStateChanged,
-  signOut,
-} from 'firebase/auth';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { ProfileCard } from '../../profile/profile-card/profile-card';
 import { ProfileMenu } from '../../profile/profile-menu/profile-menu';
+import { ClickOutsideDirective } from '../../../shared/click-outside/click-outside.directive';
 import { FIREBASE_AUTH } from '../../../shared/firebase/firebase.tokens';
 import { Icon } from '../../../shared/icon/icon';
 import { User } from '../../../shared/models';
 import { UserService } from '../../../shared/user/user.service';
 
-export type HeaderVariant =
-  | 'auth-login'
-  | 'auth-register'
-  | 'app'
-  | 'mobile';
+export type HeaderVariant = 'auth-login' | 'auth-register' | 'app' | 'mobile';
 
 @Component({
   selector: 'app-header',
-  imports: [
-    RouterLink,
-    Icon,
-    ProfileCard,
-    ProfileMenu,
-  ],
+  imports: [RouterLink, Icon, ProfileCard, ProfileMenu, ClickOutsideDirective],
   templateUrl: './header.html',
   styleUrl: './header.scss',
 })
@@ -60,9 +43,7 @@ export class Header implements OnInit {
     if (!uid) return;
 
     this.currentUid.set(uid);
-    this.currentUser.set(
-      await this.userService.getUser(uid),
-    );
+    this.currentUser.set(await this.userService.getUser(uid));
   }
 
   /** Wartet bei Bedarf auf die Firebase-Session. */
@@ -77,19 +58,21 @@ export class Header implements OnInit {
   /** Wartet auf die erste Firebase-Auth-State-Aenderung. */
   private waitForAuthState(): Promise<string | null> {
     return new Promise((resolve) => {
-      const unsubscribe = onAuthStateChanged(
-        this.auth,
-        (user) => {
-          unsubscribe();
-          resolve(user?.uid ?? null);
-        },
-      );
+      const unsubscribe = onAuthStateChanged(this.auth, (user) => {
+        unsubscribe();
+        resolve(user?.uid ?? null);
+      });
     });
   }
 
   /** Oeffnet oder schliesst das Profilmenue. */
   protected toggleProfileMenu(): void {
     this.showProfileMenu.update((open) => !open);
+  }
+
+  /** Schliesst das Profilmenue (z. B. Klick ausserhalb). */
+  protected closeProfileMenu(): void {
+    this.showProfileMenu.set(false);
   }
 
   /** Oeffnet das eigene Profil. */

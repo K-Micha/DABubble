@@ -2,10 +2,7 @@
   <app-header variant="app"></app-header>
 
   <div class="workspace__columns">
-    <div
-      class="workspace__sidebar-area"
-      [class.workspace__sidebar-area--closed]="!sidebarOpen()"
-    >
+    <div class="workspace__sidebar-area" [class.workspace__sidebar-area--closed]="!sidebarOpen()">
       @if (sidebarOpen()) {
         <app-sidebar
           (channelSelected)="onChannelSelected($event)"
@@ -16,20 +13,12 @@
       <button
         type="button"
         class="workspace__sidebar-toggle"
-        [attr.aria-label]="
-          sidebarOpen()
-            ? 'Workspace-Menü schließen'
-            : 'Workspace-Menü öffnen'
-        "
+        [attr.aria-label]="sidebarOpen() ? 'Workspace-Menü schließen' : 'Workspace-Menü öffnen'"
         (click)="toggleSidebar()"
       >
         <img
           class="workspace__sidebar-toggle-icon"
-          [src]="
-            sidebarOpen()
-              ? 'icons/sidebar-close.svg'
-              : 'icons/sidebar-open.svg'
-          "
+          [src]="sidebarOpen() ? 'icons/sidebar-close.svg' : 'icons/sidebar-open.svg'"
           alt=""
         />
 
@@ -45,18 +34,16 @@
         [channel]="selectedChannel()"
         [user]="selectedUser()"
         (click)="onMainChatClick($event)"
+        (replyClicked)="onReplyClicked($event)"
       ></app-main-chat>
 
       @if (addMembersOpen()) {
         @if (selectedChannel(); as channel) {
-          <app-add-members
-            [channelId]="channel.id"
-            (closed)="closeAddMembers()"
-          />
+          <app-add-members [channelId]="channel.id" (closed)="closeAddMembers()" />
         }
       }
     </div>
 
-    <app-thread></app-thread>
+    <app-thread [message]="activeThreadMessage()" (closed)="onThreadClosed()"></app-thread>
   </div>
 </div>

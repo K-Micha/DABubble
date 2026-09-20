@@ -17,17 +17,10 @@
 
   @if (variant === 'auth-login') {
     <div class="header__register">
-      <span class="header__register-hint">
-        Neu bei DABubble?
-      </span>
+      <span class="header__register-hint"> Neu bei DABubble? </span>
 
       <div class="header__register-wrapper">
-        <a
-          class="header__link"
-          routerLink="/register"
-        >
-          Konto erstellen
-        </a>
+        <a class="header__link" routerLink="/register"> Konto erstellen </a>
       </div>
     </div>
   }
@@ -36,10 +29,7 @@
     <label class="header__search">
       <app-icon name="search" />
 
-      <input
-        type="text"
-        placeholder="Devspace durchsuchen"
-      />
+      <input type="text" placeholder="Devspace durchsuchen" />
     </label>
 
     <div class="header__user">
@@ -48,13 +38,7 @@
       </span>
 
       <span class="header__user-avatar">
-        <img
-          [src]="
-            currentUser()?.avatarUrl
-            ?? 'img/avatar/profile_blank.svg'
-          "
-          alt=""
-        />
+        <img [src]="currentUser()?.avatarUrl ?? 'img/avatar/profile_blank.svg'" alt="" />
 
         <span class="header__user-dot"></span>
       </span>
@@ -72,24 +56,20 @@
 
   @if (variant === 'mobile') {
     <div class="header__avatar">
-      <img
-        src="img/avatar/profile_blank.svg"
-        alt="Profil"
-      />
+      <img src="img/avatar/profile_blank.svg" alt="Profil" />
     </div>
   }
 </header>
 
 @if (showProfileMenu()) {
   <app-profile-menu
+    appClickOutside
+    (appClickOutside)="closeProfileMenu()"
     (profile)="openProfile()"
     (logout)="logout()"
   />
 }
 
 @if (showProfile() && currentUid(); as uid) {
-  <app-profile-card
-    [userId]="uid"
-    (closed)="onProfileClosed()"
-  />
+  <app-profile-card [userId]="uid" (closed)="onProfileClosed()" />
 }

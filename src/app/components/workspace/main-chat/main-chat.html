@@ -18,14 +18,8 @@
             {{ channelName() }}
           </span>
 
-          <svg
-            class="main-chat__channel-chevron"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path
-              d="M7.41 8.59 L12 13.17 l4.59 -4.58 L18 10 l-6 6 l-6 -6 Z"
-            />
+          <svg class="main-chat__channel-chevron" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M7.41 8.59 L12 13.17 l4.59 -4.58 L18 10 l-6 6 l-6 -6 Z" />
           </svg>
         </button>
       }
@@ -50,11 +44,7 @@
   </header>
 
   <div class="main-chat__body">
-    @for (
-      message of messages();
-      track message.id;
-      let index = $index
-    ) {
+    @for (message of messages(); track message.id; let index = $index) {
       @if (showDateSeparator(index)) {
         <div class="main-chat__date-separator">
           <span class="main-chat__date-line"></span>
@@ -69,12 +59,8 @@
 
       <div
         class="main-chat__message"
-        [class.main-chat__message--outgoing]="
-          isOwnMessage(message.senderId)
-        "
-        [class.main-chat__message--incoming]="
-          !isOwnMessage(message.senderId)
-        "
+        [class.main-chat__message--outgoing]="isOwnMessage(message.senderId)"
+        [class.main-chat__message--incoming]="!isOwnMessage(message.senderId)"
       >
         <img
           class="main-chat__message-avatar"
@@ -105,10 +91,7 @@
               </p>
             }
 
-            @if (
-              message.attachmentPath
-              && message.attachmentName
-            ) {
+            @if (message.attachmentPath && message.attachmentName) {
               <button
                 type="button"
                 class="main-chat__message-attachment"
@@ -120,29 +103,18 @@
           </div>
 
           <div class="main-chat__reactions">
-            @for (
-              reaction of getReactionGroups(message);
-              track reaction.emoji
-            ) {
+            @for (reaction of getReactionGroups(message); track reaction.emoji) {
               <button
                 type="button"
                 class="main-chat__reaction"
-                (click)="
-                  toggleReaction(
-                    message,
-                    reaction.emoji
-                  )
-                "
+                (click)="toggleReaction(message, reaction.emoji)"
               >
                 <span>{{ reaction.emoji }}</span>
                 <span>{{ reaction.count }}</span>
               </button>
             }
 
-            @if (
-              !isReactionsExpanded(message.id)
-              && getHiddenReactionCount(message) > 0
-            ) {
+            @if (!isReactionsExpanded(message.id) && getHiddenReactionCount(message) > 0) {
               <span class="main-chat__reaction-overflow">
                 +{{ getHiddenReactionCount(message) }}
               </span>
@@ -156,10 +128,7 @@
               </button>
             }
 
-            @if (
-              isReactionsExpanded(message.id)
-              && getHiddenReactionCount(message) > 0
-            ) {
+            @if (isReactionsExpanded(message.id) && getHiddenReactionCount(message) > 0) {
               <span class="main-chat__reaction-overflow">
                 +{{ getHiddenReactionCount(message) }}
               </span>
@@ -175,6 +144,15 @@
               </button>
             }
 
+            <button
+              type="button"
+              class="main-chat__reply-trigger"
+              aria-label="Im Thread antworten"
+              (click)="onReply(message)"
+            >
+              <app-icon name="reply" />
+            </button>
+
             <div class="main-chat__reaction-menu">
               <button
                 type="button"
@@ -185,24 +163,14 @@
                 ☺
               </button>
 
-              @if (
-                activeReactionMessageId()
-                === message.id
-              ) {
-                <div class="main-chat__reaction-picker">
-                  @for (
-                    emoji of reactionOptions;
-                    track emoji
-                  ) {
-                    <button
-                      type="button"
-                      (click)="
-                        toggleReaction(
-                          message,
-                          emoji
-                        )
-                      "
-                    >
+              @if (activeReactionMessageId() === message.id) {
+                <div
+                  class="main-chat__reaction-picker"
+                  appClickOutside
+                  (appClickOutside)="activeReactionMessageId.set(null)"
+                >
+                  @for (emoji of reactionOptions; track emoji) {
+                    <button type="button" (click)="toggleReaction(message, emoji)">
                       {{ emoji }}
                     </button>
                   }
@@ -243,12 +211,7 @@
       (input)="onMessageInput($event)"
     ></textarea>
 
-    <input
-      #fileInput
-      type="file"
-      hidden
-      (change)="onFileSelected($event)"
-    />
+    <input #fileInput type="file" hidden (change)="onFileSelected($event)" />
 
     <div class="main-chat__input-row">
       <button
@@ -260,12 +223,7 @@
         <app-icon name="attachment" />
       </button>
 
-      <button
-        type="button"
-        class="main-chat__send"
-        aria-label="Senden"
-        (click)="onSend()"
-      >
+      <button type="button" class="main-chat__send" aria-label="Senden" (click)="onSend()">
         <app-icon name="send" />
       </button>
     </div>
@@ -280,9 +238,6 @@
   }
 
   @if (selectedChannelInfoId(); as channelId) {
-    <app-channel-info
-      [channelId]="channelId"
-      (closed)="closeChannelInfo()"
-    />
+    <app-channel-info [channelId]="channelId" (closed)="closeChannelInfo()" />
   }
 </section>

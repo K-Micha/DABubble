@@ -18,7 +18,8 @@ export type IconName =
   | 'search'
   | 'chevron-down'
   | 'plus'
-  | 'attachment';
+  | 'attachment'
+  | 'reply';
 
 /**
  * Inline-SVG-Icons (kein Asset-Request, per `color` einfärbbar via currentColor).

@@ -1,8 +1,9 @@
-import { Component, inject, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
+import { ClickOutsideDirective } from '../../../shared/click-outside/click-outside.directive';
 import { FIREBASE_AUTH } from '../../../shared/firebase/firebase.tokens';
 import { Icon } from '../../../shared/icon/icon';
 import { MessageService } from '../../../shared/message/message';
-import { Channel, Message, User, } from '../../../shared/models';
+import { Channel, Message, User } from '../../../shared/models';
 import { ChannelInfo } from '../../channel/channel-info/channel-info';
 import { ProfileCard } from '../../profile/profile-card/profile-card';
 import { MainChatDateService } from './main-chat-date.service';
@@ -10,16 +11,12 @@ import { MainChatProfileService } from './main-chat-profile.service';
 import { MainChatReactionService } from './main-chat-reaction.service';
 import type { ReactionGroup } from './main-chat-reaction.service';
 import { MainChatSessionService } from './main-chat-session.service';
-import { AttachmentData, MainChatUploadService, } from './main-chat-upload.service';
+import { AttachmentData, MainChatUploadService } from './main-chat-upload.service';
 
 /** Verwaltet Darstellung und Eingaben des Main-Chats. */
 @Component({
   selector: 'app-main-chat',
-  imports: [
-    Icon,
-    ProfileCard,
-    ChannelInfo,
-  ],
+  imports: [Icon, ProfileCard, ChannelInfo, ClickOutsideDirective],
   providers: [
     MainChatDateService,
     MainChatProfileService,
@@ -39,26 +36,19 @@ export class MainChat implements OnInit {
   private readonly sessionService = inject(MainChatSessionService);
   private readonly uploadService = inject(MainChatUploadService);
 
-  protected readonly channelName =
-    this.sessionService.channelName;
+  protected readonly channelName = this.sessionService.channelName;
 
-  protected readonly messages =
-    this.sessionService.messages;
+  protected readonly messages = this.sessionService.messages;
 
-  protected readonly directUser =
-    this.sessionService.directUser;
+  protected readonly directUser = this.sessionService.directUser;
 
-  protected readonly selectedProfileUserId =
-    this.profileService.selectedProfileUserId;
+  protected readonly selectedProfileUserId = this.profileService.selectedProfileUserId;
 
-  protected readonly selectedChannelInfoId =
-    this.profileService.selectedChannelInfoId;
+  protected readonly selectedChannelInfoId = this.profileService.selectedChannelInfoId;
 
-  protected readonly activeReactionMessageId =
-    this.reactionService.activeReactionMessageId;
+  protected readonly activeReactionMessageId = this.reactionService.activeReactionMessageId;
 
-  protected readonly reactionOptions =
-    this.reactionService.reactionOptions;
+  protected readonly reactionOptions = this.reactionService.reactionOptions;
 
   protected selectedFile: File | null = null;
   protected messageText = '';
@@ -69,13 +59,15 @@ export class MainChat implements OnInit {
     'img/avatar/avatar03.svg',
   ];
 
+  /** Nachricht, auf die im Thread-Panel geantwortet werden soll. */
+  @Output() replyClicked = new EventEmitter<Message>();
+
   /** Uebernimmt einen ausgewaehlten Channel. */
   @Input()
   set channel(channel: Channel | null) {
     if (!channel) return;
 
-    const switched =
-      this.sessionService.switchChannel(channel);
+    const switched = this.sessionService.switchChannel(channel);
 
     if (switched) this.resetComposer();
   }
@@ -110,9 +102,7 @@ export class MainChat implements OnInit {
 
   /** Oeffnet die Channel-Informationen. */
   protected openChannelInfo(): void {
-    this.profileService.openChannelInfo(
-      this.sessionService.channelId(),
-    );
+    this.profileService.openChannelInfo(this.sessionService.channelId());
   }
 
   /** Schliesst die Channel-Informationen. */
@@ -156,8 +146,7 @@ export class MainChat implements OnInit {
   }
 
   /** Liefert die sichtbaren Reactions. */
-  protected getReactionGroups(
-    message: Message,): ReactionGroup[] {
+  protected getReactionGroups(message: Message): ReactionGroup[] {
     return this.reactionService.getReactionGroups(message);
   }
 
@@ -182,22 +171,13 @@ export class MainChat implements OnInit {
   }
 
   /** Fuegt eine Reaction hinzu oder entfernt sie. */
-  protected async toggleReaction(
-    message: Message,
-    emoji: string,): Promise<void> {
-    await this.reactionService.toggleReaction(
-      message,
-      emoji,
-      this.sessionService.channelId(),
-    );
+  protected async toggleReaction(message: Message, emoji: string): Promise<void> {
+    await this.reactionService.toggleReaction(message, emoji, this.sessionService.channelId());
   }
 
   /** Prueft, ob ein Datumstrenner angezeigt wird. */
   protected showDateSeparator(index: number): boolean {
-    return this.dateService.showDateSeparator(
-      this.messages(),
-      index,
-    );
+    return this.dateService.showDateSeparator(this.messages(), index);
   }
 
   /** Formatiert das Datum eines Nachrichtentrenners. */
@@ -208,6 +188,11 @@ export class MainChat implements OnInit {
   /** Reagiert auf die Mitgliederverwaltung. */
   protected onAddMembers(): void {
     console.log('[main-chat] add members clicked');
+  }
+
+  /** Oeffnet das Thread-Panel fuer eine Nachricht. */
+  protected onReply(message: Message): void {
+    this.replyClicked.emit(message);
   }
 
   /** Uebernimmt den Inhalt des Nachrichtenfeldes. */
@@ -243,10 +228,7 @@ export class MainChat implements OnInit {
   }
 
   /** Prueft die Voraussetzungen fuer den Versand. */
-  private canSendMessage(
-    text: string,
-    senderId: string | undefined,): boolean {
-
+  private canSendMessage(text: string, senderId: string | undefined): boolean {
     if (!text && !this.selectedFile) return false;
     if (!senderId) return false;
 
@@ -255,10 +237,7 @@ export class MainChat implements OnInit {
 
   /** Erstellt die Anhangsdaten einer Nachricht. */
   private async getAttachmentData(): Promise<AttachmentData | null> {
-    const attachment =
-      await this.uploadService.getAttachmentData(
-        this.selectedFile,
-      );
+    const attachment = await this.uploadService.getAttachmentData(this.selectedFile);
 
     if (attachment && this.selectedFile) {
       this.selectedFile = null;
@@ -271,25 +250,17 @@ export class MainChat implements OnInit {
   private async saveMessage(
     text: string,
     senderId: string,
-    attachment: AttachmentData,): Promise<void> {
+    attachment: AttachmentData,
+  ): Promise<void> {
     const channelId = this.sessionService.channelId();
 
     if (channelId) {
-      await this.saveChannelMessage(
-        channelId,
-        text,
-        senderId,
-        attachment,
-      );
+      await this.saveChannelMessage(channelId, text, senderId, attachment);
 
       return;
     }
 
-    await this.saveDirectMessage(
-      text,
-      senderId,
-      attachment,
-    );
+    await this.saveDirectMessage(text, senderId, attachment);
   }
 
   /** Speichert eine Channel-Nachricht. */
@@ -297,8 +268,8 @@ export class MainChat implements OnInit {
     channelId: string,
     text: string,
     senderId: string,
-    attachment: AttachmentData,): Promise<void> {
-
+    attachment: AttachmentData,
+  ): Promise<void> {
     await this.messageService.sendChannelMessage(
       channelId,
       senderId,
@@ -312,8 +283,8 @@ export class MainChat implements OnInit {
   private async saveDirectMessage(
     text: string,
     senderId: string,
-    attachment: AttachmentData,): Promise<void> {
-
+    attachment: AttachmentData,
+  ): Promise<void> {
     const dmId = this.sessionService.dmId();
     if (!dmId) return;
 
@@ -346,11 +317,8 @@ export class MainChat implements OnInit {
   }
 
   /** Oeffnet einen privaten Nachrichtenanhang. */
-  protected async openAttachment(
-    attachmentPath: string,): Promise<void> {
-    await this.uploadService.openAttachment(
-      attachmentPath,
-    );
+  protected async openAttachment(attachmentPath: string): Promise<void> {
+    await this.uploadService.openAttachment(attachmentPath);
   }
 
   /** Entfernt die aktuell ausgewaehlte Datei. */

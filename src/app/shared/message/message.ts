@@ -22,25 +22,14 @@ export class MessageService {
   private readonly firestore = inject(FIRESTORE);
 
   /** Liefert einen bestehenden Direktchat oder legt einen neuen an. */
-  async getOrCreateDirectChat(
-    userIdA: string,
-    userIdB: string,
-  ): Promise<string> {
+  async getOrCreateDirectChat(userIdA: string, userIdB: string): Promise<string> {
     const directChats = collection(this.firestore, 'directChats');
 
-    const existingChat = await this.findDirectChat(
-      directChats,
-      userIdA,
-      userIdB,
-    );
+    const existingChat = await this.findDirectChat(directChats, userIdA, userIdB);
 
     if (existingChat) return existingChat.id;
 
-    return this.createDirectChat(
-      directChats,
-      userIdA,
-      userIdB,
-    );
+    return this.createDirectChat(directChats, userIdA, userIdB);
   }
 
   /** Sucht einen bestehenden Direktchat zwischen zwei Usern. */
@@ -49,10 +38,7 @@ export class MessageService {
     userIdA: string,
     userIdB: string,
   ) {
-    const directChatQuery = query(
-      directChats,
-      where('memberIds', 'array-contains', userIdA),
-    );
+    const directChatQuery = query(directChats, where('memberIds', 'array-contains', userIdA));
 
     const snapshot = await getDocs(directChatQuery);
 
@@ -71,11 +57,7 @@ export class MessageService {
   ): Promise<string> {
     const ref = doc(directChats);
 
-    const chat = this.createDirectChatData(
-      ref.id,
-      userIdA,
-      userIdB,
-    );
+    const chat = this.createDirectChatData(ref.id, userIdA, userIdB);
 
     await setDoc(ref, chat);
 
@@ -83,11 +65,7 @@ export class MessageService {
   }
 
   /** Erstellt die Daten fuer einen neuen Direktchat. */
-  private createDirectChatData(
-    id: string,
-    userIdA: string,
-    userIdB: string,
-  ): DirectChat {
+  private createDirectChatData(id: string, userIdA: string, userIdB: string): DirectChat {
     return {
       id,
       memberIds: [userIdA, userIdB],
@@ -100,27 +78,16 @@ export class MessageService {
     channelId: string,
     callback: (messages: Message[]) => void,
   ): Unsubscribe {
-    const messages =
-      this.createChannelMessagesCollection(channelId);
+    const messages = this.createChannelMessagesCollection(channelId);
 
-    return this.subscribeMessages(
-      messages,
-      callback,
-    );
+    return this.subscribeMessages(messages, callback);
   }
 
   /** Beobachtet Direktnachrichten in Echtzeit. */
-  subscribeDirectMessages(
-    dmId: string,
-    callback: (messages: Message[]) => void,
-  ): Unsubscribe {
-    const messages =
-      this.createDirectMessagesCollection(dmId);
+  subscribeDirectMessages(dmId: string, callback: (messages: Message[]) => void): Unsubscribe {
+    const messages = this.createDirectMessagesCollection(dmId);
 
-    return this.subscribeMessages(
-      messages,
-      callback,
-    );
+    return this.subscribeMessages(messages, callback);
   }
 
   /** Beobachtet eine Nachrichten-Collection nach Zeit sortiert. */
@@ -128,38 +95,21 @@ export class MessageService {
     messages: ReturnType<typeof collection>,
     callback: (messages: Message[]) => void,
   ): Unsubscribe {
-    const messageQuery = query(
-      messages,
-      orderBy('timestamp', 'asc'),
-    );
+    const messageQuery = query(messages, orderBy('timestamp', 'asc'));
 
     return onSnapshot(messageQuery, (snapshot) => {
-      callback(
-        snapshot.docs.map(
-          (entry) => entry.data() as Message,
-        ),
-      );
+      callback(snapshot.docs.map((entry) => entry.data() as Message));
     });
   }
 
   /** Liefert die Nachrichten-Collection eines Channels. */
   private createChannelMessagesCollection(channelId: string) {
-    return collection(
-      this.firestore,
-      'channels',
-      channelId,
-      'messages',
-    );
+    return collection(this.firestore, 'channels', channelId, 'messages');
   }
 
   /** Liefert die Nachrichten-Collection eines Direktchats. */
   private createDirectMessagesCollection(dmId: string) {
-    return collection(
-      this.firestore,
-      'directChats',
-      dmId,
-      'messages',
-    );
+    return collection(this.firestore, 'directChats', dmId, 'messages');
   }
 
   /** Speichert eine Nachricht innerhalb eines Channels. */
@@ -170,22 +120,11 @@ export class MessageService {
     attachmentPath?: string,
     attachmentName?: string,
   ): Promise<string> {
-    const ref = doc(
-      this.createChannelMessagesCollection(channelId),
-    );
+    const ref = doc(this.createChannelMessagesCollection(channelId));
 
-    const message = this.createChannelMessage(
-      ref.id,
-      channelId,
-      senderId,
-      text,
-    );
+    const message = this.createChannelMessage(ref.id, channelId, senderId, text);
 
-    this.addAttachmentData(
-      message,
-      attachmentPath,
-      attachmentName,
-    );
+    this.addAttachmentData(message, attachmentPath, attachmentName);
 
     await setDoc(ref, message);
 
@@ -200,22 +139,11 @@ export class MessageService {
     attachmentPath?: string,
     attachmentName?: string,
   ): Promise<string> {
-    const ref = doc(
-      this.createDirectMessagesCollection(dmId),
-    );
+    const ref = doc(this.createDirectMessagesCollection(dmId));
 
-    const message = this.createDirectMessage(
-      ref.id,
-      dmId,
-      senderId,
-      text,
-    );
+    const message = this.createDirectMessage(ref.id, dmId, senderId, text);
 
-    this.addAttachmentData(
-      message,
-      attachmentPath,
-      attachmentName,
-    );
+    this.addAttachmentData(message, attachmentPath, attachmentName);
 
     await setDoc(ref, message);
 
@@ -228,10 +156,7 @@ export class MessageService {
     messageId: string,
     reaction: Reaction,
   ): Promise<void> {
-    const ref = this.createChannelMessageDoc(
-      channelId,
-      messageId,
-    );
+    const ref = this.createChannelMessageDoc(channelId, messageId);
 
     await updateDoc(ref, {
       reactions: arrayUnion(reaction),
@@ -244,10 +169,7 @@ export class MessageService {
     messageId: string,
     reaction: Reaction,
   ): Promise<void> {
-    const ref = this.createChannelMessageDoc(
-      channelId,
-      messageId,
-    );
+    const ref = this.createChannelMessageDoc(channelId, messageId);
 
     await updateDoc(ref, {
       reactions: arrayRemove(reaction),
@@ -255,15 +177,8 @@ export class MessageService {
   }
 
   /** Fuegt einer Direktnachricht eine Reaction hinzu. */
-  async addDirectReaction(
-    dmId: string,
-    messageId: string,
-    reaction: Reaction,
-  ): Promise<void> {
-    const ref = this.createDirectMessageDoc(
-      dmId,
-      messageId,
-    );
+  async addDirectReaction(dmId: string, messageId: string, reaction: Reaction): Promise<void> {
+    const ref = this.createDirectMessageDoc(dmId, messageId);
 
     await updateDoc(ref, {
       reactions: arrayUnion(reaction),
@@ -271,15 +186,8 @@ export class MessageService {
   }
 
   /** Entfernt eine Reaction von einer Direktnachricht. */
-  async removeDirectReaction(
-    dmId: string,
-    messageId: string,
-    reaction: Reaction,
-  ): Promise<void> {
-    const ref = this.createDirectMessageDoc(
-      dmId,
-      messageId,
-    );
+  async removeDirectReaction(dmId: string, messageId: string, reaction: Reaction): Promise<void> {
+    const ref = this.createDirectMessageDoc(dmId, messageId);
 
     await updateDoc(ref, {
       reactions: arrayRemove(reaction),
@@ -287,31 +195,13 @@ export class MessageService {
   }
 
   /** Liefert eine vorhandene Channel-Nachricht. */
-  private createChannelMessageDoc(
-    channelId: string,
-    messageId: string,
-  ) {
-    return doc(
-      this.firestore,
-      'channels',
-      channelId,
-      'messages',
-      messageId,
-    );
+  private createChannelMessageDoc(channelId: string, messageId: string) {
+    return doc(this.firestore, 'channels', channelId, 'messages', messageId);
   }
 
   /** Liefert eine vorhandene Direktnachricht. */
-  private createDirectMessageDoc(
-    dmId: string,
-    messageId: string,
-  ) {
-    return doc(
-      this.firestore,
-      'directChats',
-      dmId,
-      'messages',
-      messageId,
-    );
+  private createDirectMessageDoc(dmId: string, messageId: string) {
+    return doc(this.firestore, 'directChats', dmId, 'messages', messageId);
   }
 
   /** Erstellt das Grundobjekt einer Channel-Nachricht. */
@@ -332,12 +222,7 @@ export class MessageService {
   }
 
   /** Erstellt das Grundobjekt einer Direktnachricht. */
-  private createDirectMessage(
-    id: string,
-    dmId: string,
-    senderId: string,
-    text: string,
-  ): Message {
+  private createDirectMessage(id: string, dmId: string, senderId: string, text: string): Message {
     return {
       id,
       dmId,
@@ -361,5 +246,112 @@ export class MessageService {
     if (attachmentName) {
       message.attachmentName = attachmentName;
     }
+  }
+
+  /** Beobachtet die Antworten eines Threads in Echtzeit. */
+  subscribeThreadReplies(
+    parentMessage: Message,
+    callback: (replies: Message[]) => void,
+  ): Unsubscribe {
+    const replies = this.createThreadRepliesCollection(parentMessage);
+
+    return this.subscribeMessages(replies, callback);
+  }
+
+  /** Liefert die Antworten-Collection einer Channel- oder Direktnachricht. */
+  private createThreadRepliesCollection(parentMessage: Message) {
+    if (parentMessage.channelId) {
+      return collection(
+        this.firestore,
+        'channels',
+        parentMessage.channelId,
+        'messages',
+        parentMessage.id,
+        'replies',
+      );
+    }
+
+    return collection(
+      this.firestore,
+      'directChats',
+      parentMessage.dmId ?? '',
+      'messages',
+      parentMessage.id,
+      'replies',
+    );
+  }
+
+  /** Speichert eine Antwort innerhalb eines Threads. */
+  async sendThreadReply(
+    parentMessage: Message,
+    senderId: string,
+    text: string,
+    attachmentPath?: string,
+    attachmentName?: string,
+  ): Promise<string> {
+    const replies = this.createThreadRepliesCollection(parentMessage);
+
+    const ref = doc(replies);
+    const reply = this.createThreadReply(ref.id, parentMessage, senderId, text);
+
+    this.addAttachmentData(reply, attachmentPath, attachmentName);
+
+    await setDoc(ref, reply);
+    return reply.id;
+  }
+
+  /** Erstellt das Grundobjekt einer Thread-Antwort. */
+  private createThreadReply(
+    id: string,
+    parentMessage: Message,
+    senderId: string,
+    text: string,
+  ): Message {
+    const reply: Message = {
+      id,
+      threadId: parentMessage.id,
+      senderId,
+      text,
+      timestamp: Date.now(),
+      reactions: [],
+    };
+
+    // Firestore lehnt explizite `undefined`-Werte ab - nur das jeweils
+    // vorhandene Feld setzen (Channel- oder Direktchat-Nachricht).
+    if (parentMessage.channelId) reply.channelId = parentMessage.channelId;
+    if (parentMessage.dmId) reply.dmId = parentMessage.dmId;
+
+    return reply;
+  }
+
+  /** Fuegt einer Thread-Antwort eine Reaction hinzu. */
+  async addReplyReaction(
+    parentMessage: Message,
+    replyId: string,
+    reaction: Reaction,
+  ): Promise<void> {
+    const ref = this.createThreadReplyDoc(parentMessage, replyId);
+
+    await updateDoc(ref, {
+      reactions: arrayUnion(reaction),
+    });
+  }
+
+  /** Entfernt eine Reaction von einer Thread-Antwort. */
+  async removeReplyReaction(
+    parentMessage: Message,
+    replyId: string,
+    reaction: Reaction,
+  ): Promise<void> {
+    const ref = this.createThreadReplyDoc(parentMessage, replyId);
+
+    await updateDoc(ref, {
+      reactions: arrayRemove(reaction),
+    });
+  }
+
+  /** Liefert die Referenz zu einer vorhandenen Thread-Antwort. */
+  private createThreadReplyDoc(parentMessage: Message, replyId: string) {
+    return doc(this.createThreadRepliesCollection(parentMessage), replyId);
   }
 }
