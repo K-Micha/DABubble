@@ -9,7 +9,6 @@
 .workspace {
   @include mx.flex(column, flex-start, stretch);
   height: 100%;
-  background: fct.color(background);
 }
 
 .workspace__columns {
