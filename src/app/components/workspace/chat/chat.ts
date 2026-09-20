@@ -41,6 +41,9 @@ export class Chat {
   protected readonly addMembersOpen =
     signal(false);
 
+  protected readonly sidebarOpen =
+    signal(true);
+
   /** Lädt beim Start denselben ersten Channel wie der Main-Chat. */
   constructor() {
     void this.loadInitialChannel();
@@ -48,7 +51,8 @@ export class Chat {
 
   /** Setzt den initial geöffneten Channel auch im Workspace. */
   private async loadInitialChannel(): Promise<void> {
-    const channels = await this.channelService.listChannels();
+    const channels =
+      await this.channelService.listChannels();
 
     this.selectedChannel.set(
       channels[0] ?? null,
@@ -68,11 +72,23 @@ export class Chat {
     this.addMembersOpen.set(false);
   }
 
+  /** Öffnet oder schließt das Workspace-Menü. */
+  protected toggleSidebar(): void {
+    this.sidebarOpen.update(
+      (open) => !open,
+    );
+  }
+
   /** Öffnet Add-Members beim Klick auf den Plus-Button. */
   protected onMainChatClick(event: Event): void {
-    const target = event.target as HTMLElement;
+    const target =
+      event.target as HTMLElement;
 
-    if (!target.closest('[aria-label="Mitglieder hinzufügen"]')) {
+    if (
+      !target.closest(
+        '[aria-label="Mitglieder hinzufügen"]',
+      )
+    ) {
       return;
     }
 

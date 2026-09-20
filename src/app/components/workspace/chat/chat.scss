@@ -20,6 +20,80 @@
   padding: 20px 32px 32px;
 }
 
+.workspace__sidebar-area {
+  position: relative;
+  flex: 0 0 370px;
+  min-width: 0;
+  height: 100%;
+}
+
+.workspace__sidebar-area--closed {
+  flex-basis: 0;
+}
+
+.workspace__sidebar-area app-sidebar {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.workspace__sidebar-toggle {
+  position: absolute;
+  top: 50%;
+  left: -32px;
+  z-index: 30;
+
+  width: 56px;
+  height: 339px;
+  padding: 20px 12px;
+  box-sizing: border-box;
+
+  border: 0;
+  border-radius: 0 30px 30px 0;
+  background: fct.color(white);
+  box-shadow: 4px 4px 7px rgba(0, 0, 0, 0.18);
+
+  color: fct.color(black);
+  cursor: pointer;
+
+  transform: translateY(-50%);
+
+  @include mx.flex(column, flex-start, center);
+  gap: 8px;
+
+  @include mx.transition();
+
+  &:hover {
+    color: fct.color(purple-1);
+  }
+}
+
+.workspace__sidebar-toggle-icon {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+}
+
+.workspace__sidebar-toggle-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+
+  width: 253px;
+  height: 24px;
+
+  white-space: nowrap;
+  text-align: center;
+
+  @include mx.typo(nunito, 500);
+  font-size: 20px;
+  line-height: 120%;
+
+  transform:
+    translate(-50%, -50%)
+    rotate(-90deg);
+}
+
 .workspace__main {
   position: relative;
   flex: 1 1 auto;

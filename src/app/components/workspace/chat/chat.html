@@ -2,10 +2,43 @@
   <app-header variant="app"></app-header>
 
   <div class="workspace__columns">
-    <app-sidebar
-      (channelSelected)="onChannelSelected($event)"
-      (userSelected)="onUserSelected($event)"
-    ></app-sidebar>
+    <div
+      class="workspace__sidebar-area"
+      [class.workspace__sidebar-area--closed]="!sidebarOpen()"
+    >
+      @if (sidebarOpen()) {
+        <app-sidebar
+          (channelSelected)="onChannelSelected($event)"
+          (userSelected)="onUserSelected($event)"
+        ></app-sidebar>
+      }
+
+      <button
+        type="button"
+        class="workspace__sidebar-toggle"
+        [attr.aria-label]="
+          sidebarOpen()
+            ? 'Workspace-Menü schließen'
+            : 'Workspace-Menü öffnen'
+        "
+        (click)="toggleSidebar()"
+      >
+        <img
+          class="workspace__sidebar-toggle-icon"
+          [src]="
+            sidebarOpen()
+              ? 'icons/sidebar-close.svg'
+              : 'icons/sidebar-open.svg'
+          "
+          alt=""
+        />
+
+        <span class="workspace__sidebar-toggle-text">
+          Workspace-Menü
+          {{ sidebarOpen() ? 'schließen' : 'öffnen' }}
+        </span>
+      </button>
+    </div>
 
     <div class="workspace__main">
       <app-main-chat
